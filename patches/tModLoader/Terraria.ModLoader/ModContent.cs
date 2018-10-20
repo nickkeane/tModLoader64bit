@@ -194,11 +194,11 @@ namespace Terraria.ModLoader
 				mod.Load();
 				mod.loading = false;
 			});
-			
+
 			Interface.loadMods.SetLoadStage("tModLoader.MSSettingUp");
 			ResizeArrays();
 			RecipeGroupHelper.FixRecipeGroupLookups();
-			
+
 			Interface.loadMods.SetLoadStage("tModLoader.MSLoading", ModLoader.Mods.Length);
 			LoadModContent(mod => {
 				mod.SetupContent();
@@ -208,9 +208,9 @@ namespace Terraria.ModLoader
 
 			if (Main.dedServ)
 				ModNet.AssignNetIDs();
-			
+
 			Main.player[255] = new Player(false); // setup inventory is unnecessary 
-			
+
 			RefreshModLanguage(Language.ActiveCulture);
 			MapLoader.SetupModMap();
 			ItemSorting.SetupWhiteLists();
@@ -224,10 +224,12 @@ namespace Terraria.ModLoader
 			foreach (var mod in ModLoader.Mods)
 			{
 				Interface.loadMods.SetCurrentMod(num++, mod.Name);
-				try {
+				try
+				{
 					loadAction(mod);
 				}
-				catch (Exception e) {
+				catch (Exception e)
+				{
 					e.Data["mod"] = mod.Name;
 					throw;
 				}
@@ -239,7 +241,7 @@ namespace Terraria.ModLoader
 			Interface.loadMods.SetLoadStage("tModLoader.MSAddingRecipes");
 			for (int k = 0; k < Recipe.maxRecipes; k++)
 				Main.recipe[k] = new Recipe();
-			
+
 			Recipe.numRecipes = 0;
 			RecipeGroupHelper.ResetRecipeGroups();
 			Recipe.SetupRecipes();

@@ -250,6 +250,13 @@ namespace Terraria.ModLoader
 				mod.UpdateWeakRefs();
 		}
 
+		private static Assembly LoadAssembly(byte[] code, byte[] pdb = null)
+		{
+			var asm = Assembly.Load(code, pdb);
+			loadedAssemblies[asm.GetName().Name] = asm;
+			return asm;
+		}
+
 		private static Mod Instantiate(LoadedMod mod)
 		{
 			try

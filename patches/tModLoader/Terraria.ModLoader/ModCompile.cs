@@ -11,6 +11,7 @@ using Terraria.ModLoader.IO;
 using static Terraria.ModLoader.ModLoader;
 using System.Runtime.ExceptionServices;
 using Terraria.Localization;
+using Terraria.Utilities;
 
 namespace Terraria.ModLoader
 {
@@ -213,14 +214,14 @@ namespace Terraria.ModLoader
 				winDLL = monoDLL = ReadIfExists(Path.Combine(mod.path, "All.dll"));
 				winPDB = ReadIfExists(Path.Combine(mod.path, "All.pdb"));
 
-				if (winDLL == null)
-				{
-					winDLL = ReadIfExists(Path.Combine(mod.path, "Windows.dll"));
-					monoDLL = ReadIfExists(Path.Combine(mod.path, "Mono.dll"));
-					winPDB = ReadIfExists(Path.Combine(mod.path, "Windows.pdb"));
-				}
+				//if (winDLL == null)
+				//{
+				//	winDLL = ReadIfExists(Path.Combine(mod.path, "Windows.dll"));
+				//	monoDLL = ReadIfExists(Path.Combine(mod.path, "Mono.dll"));
+				//	winPDB = ReadIfExists(Path.Combine(mod.path, "Windows.pdb"));
+				//}
 
-				if (winDLL == null || monoDLL == null)
+				if (winDLL == null /*|| monoDLL == null*/)
 				{
 					var missing = new List<string> {"All.dll"};
 					if (winDLL == null) missing.Add("Windows.dll");
@@ -269,16 +270,16 @@ namespace Terraria.ModLoader
 				{
 					status.SetStatus(Language.GetTextValue("tModLoader.CompilingWindows", mod));
 					status.SetProgress(0, 2);
-					CompileMod(mod, refMods, true, ref winDLL, ref winPDB);
+					CompileMod(mod, refMods, false, ref winDLL, ref winPDB);
 				}
 				if (winDLL == null)
 					return false;
 
-				status.SetStatus(Language.GetTextValue("tModLoader.CompilingMono", mod));
-				status.SetProgress(1, 2);
-				CompileMod(mod, refMods, false, ref monoDLL, ref winPDB);//the pdb reference won't actually be written to
-				if (monoDLL == null)
-					return false;
+				//status.SetStatus(Language.GetTextValue("tModLoader.MSCompilingMono", mod));
+				//status.SetProgress(1, 2);
+				//CompileMod(mod, refMods, false, ref monoDLL, ref winPDB);//the pdb reference won't actually be written to
+				//if (monoDLL == null)
+				//	return false;
 			}
 
 			if (!VerifyName(mod.Name, winDLL) || !VerifyName(mod.Name, monoDLL))
@@ -289,17 +290,17 @@ namespace Terraria.ModLoader
 
 			mod.modFile.AddFile("Info", mod.properties.ToBytes());
 
-			if (Equal(winDLL, monoDLL))
+			//if (Equal(winDLL, monoDLL))
 			{
 				mod.modFile.AddFile("All.dll", winDLL);
 				if (winPDB != null) mod.modFile.AddFile("All.pdb", winPDB);
 			}
-			else
-			{
-				mod.modFile.AddFile("Windows.dll", winDLL);
-				mod.modFile.AddFile("Mono.dll", monoDLL);
-				if (winPDB != null) mod.modFile.AddFile("Windows.pdb", winPDB);
-			}
+			//else
+			//{
+			//	mod.modFile.AddFile("Windows.dll", winDLL);
+			//	mod.modFile.AddFile("Mono.dll", monoDLL);
+			//	if (winPDB != null) mod.modFile.AddFile("Windows.pdb", winPDB);
+			//}
 
 			foreach (var resource in Directory.GetFiles(mod.path, "*", SearchOption.AllDirectories))
 			{
@@ -423,11 +424,10 @@ namespace Terraria.ModLoader
 			}
 		}
 
-		private void CompileMod(BuildingMod mod, List<LocalMod> refMods, bool forWindows,
-				ref byte[] dll, ref byte[] pdb)
+		private void CompileMod(BuildingMod mod, List<LocalMod> refMods, bool forXNA, ref byte[] dll, ref byte[] pdb)
 		{
 			LoadReferences();
-			bool generatePDB = mod.properties.includePDB && forWindows;
+			bool generatePDB = mod.properties.includePDB /*&& forXNA*/;
 			if (generatePDB && !windows)
 			{
 				Console.WriteLine(Language.GetTextValue("tModLoader.BuildErrorPDBWindowsOnly"));
@@ -440,7 +440,7 @@ namespace Terraria.ModLoader
 			var refs = new List<string>();
 
 			//everything used to compile the tModLoader for the target platform
-			refs.AddRange(GetTerrariaReferences(tempDir, forWindows));
+			refs.AddRange(GetTerrariaReferences(tempDir, forXNA));
 
 			//libs added by the mod
 			refs.AddRange(mod.properties.dllReferences.Select(refDll => Path.Combine(mod.path, "lib/" + refDll + ".dll")));
@@ -449,7 +449,7 @@ namespace Terraria.ModLoader
 			foreach (var refMod in refMods)
 			{
 				var path = Path.Combine(tempDir, refMod + ".dll");
-				File.WriteAllBytes(path, refMod.modFile.GetMainAssembly(forWindows));
+				File.WriteAllBytes(path, refMod.modFile.GetMainAssembly(forXNA));
 				refs.Add(path);
 
 				foreach (var refDll in refMod.properties.dllReferences)
@@ -494,13 +494,13 @@ namespace Terraria.ModLoader
 
 				if (results.Errors.HasErrors)
 				{
-					status.LogCompileErrors(mod.Name + (forWindows ? "/Windows.dll" : "/Mono.dll"), results.Errors,
-						forWindows != windows ? Language.GetTextValue("tModLoader.BuildErrorModCompileFolderHint") : null);
+					status.LogCompileErrors(mod.Name + (forXNA ? "/Windows.dll" : "/Mono.dll"), results.Errors,
+						forXNA != windows ? Language.GetTextValue("tModLoader.BuildErrorModCompileFolderHint") : null);
 					return;
 				}
 
 				dll = File.ReadAllBytes(compileOptions.OutputAssembly);
-				dll = PostProcess(dll, forWindows);
+				dll = PostProcess(dll, forXNA);
 				if (generatePDB)
 					pdb = File.ReadAllBytes(Path.Combine(tempDir, mod + ".pdb"));
 			}
@@ -523,18 +523,18 @@ namespace Terraria.ModLoader
 			}
 		}
 
-		private static IEnumerable<string> GetTerrariaReferences(string tempDir, bool forWindows)
+		private static IEnumerable<string> GetTerrariaReferences(string tempDir, bool forXNA)
 		{
 			LoadReferences();
 			var refs = new List<string>(moduleReferences);
 
-			if (forWindows == windows)
+			if (forXNA == xna)
 			{
 				var terrariaModule = Assembly.GetExecutingAssembly();
 				refs.Add(terrariaModule.Location);
 
 				//extract embedded resource dlls
-				foreach (var resName in terrariaModule.GetManifestResourceNames().Where(n => n.EndsWith(".dll")))
+				foreach (var resName in terrariaModule.GetManifestResourceNames().Where(n => n.EndsWith(".dll") && PlatformUtilities.IsCompatibleDLL(n)))
 				{
 					var path = Path.Combine(tempDir, Path.GetFileName(resName));
 					using (Stream res = terrariaModule.GetManifestResourceStream(resName), file = File.Create(path))
@@ -553,10 +553,10 @@ namespace Terraria.ModLoader
 					return name == "FNA.dll" || name.StartsWith("Microsoft.Xna.Framework");
 				});
 				//replace with ModCompile contents
-				var mainModulePath = Path.Combine(modCompileDir, forWindows ? "tModLoaderWindows.exe" : "tModLoaderMac.exe");
+				var mainModulePath = Path.Combine(modCompileDir, forXNA ? "tModLoaderXNA.exe" : "tModLoaderFNA.exe");
 				refs.Add(mainModulePath);
 
-				var frameworkNames = forWindows ? new[] {
+				var frameworkNames = forXNA ? new[] {
 						"Microsoft.Xna.Framework.dll",
 						"Microsoft.Xna.Framework.Game.dll",
 						"Microsoft.Xna.Framework.Graphics.dll",
@@ -646,9 +646,9 @@ namespace Terraria.ModLoader
 			return assemblyRef;
 		}
 
-		private static byte[] PostProcess(byte[] dll, bool forWindows)
+		private static byte[] PostProcess(byte[] dll, bool forDotNET)
 		{
-			if (forWindows)
+			if (forDotNET)
 				return dll;
 
 			var asm = AssemblyDefinition.ReadAssembly(new MemoryStream(dll));

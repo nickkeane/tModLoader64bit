@@ -1,0 +1,16 @@
+--- src/Terraria\Terraria.Social.Steam\CoreSocialModule.cs
++++ src/tModLoader\Terraria.Social.Steam\CoreSocialModule.cs
+@@ -101,11 +_,7 @@
+ 			else
+ 			{
+ 				this.IsSteamValid = false;
+-				AppDomain.CurrentDomain.ProcessExit += delegate(object obj, EventArgs evt)
+-				{
+-					this.IsSteamValid = false;
+-				};
+-			}
++			};
+ 		}
+ 
+ 		public void OnOverlayActivated(GameOverlayActivated_t result)
+
