@@ -280,19 +280,33 @@
  		}
  
  		public static void InitializeItemAnimations()
-@@ -2557,9 +_,10 @@
+@@ -2557,10 +_,14 @@
  					Main._renderTargetMaxSize = 2048;
  					break;
  				case GraphicsProfile.HiDef:
 -					Main.maxScreenW = 4096;
 -					Main.maxScreenH = 4096;
 -					Main._renderTargetMaxSize = 4096;
+-					Main.TrySupporting8K();
 +					int hiRes = ModLoader.ModLoader.allowGreaterResolutions ? 8192 : 4096;
 +					Main.maxScreenW = hiRes;
 +					Main.maxScreenH = hiRes;
 +					Main._renderTargetMaxSize = hiRes;
- 					Main.TrySupporting8K();
++					if (PlatformUtilities.IsXNA)
++					{
++						Main.TrySupporting8K();
++					}
  					break;
+ 			}
+ 			try
+@@ -2580,7 +_,7 @@
+ 
+ 		private static void TrySupporting8K()
+ 		{
+-			if (!Platform.IsWindows)
++			if (!Platform.IsWindows || PlatformUtilities.IsFNA || IntPtr.Size == 8)
+ 			{
+ 				return;
  			}
 @@ -2613,6 +_,7 @@
  				flag2 = false;
@@ -562,6 +576,14 @@
  					}
  					else
  					{
+@@ -4764,6 +_,7 @@
+ 		{
+ #if CLIENT
+ 			Main._cachedTitle = Lang.GetRandomGameTitle();
++			Main._cachedTitle += " (64-bit)";
+ 			Platform.Current.SetWindowUnicodeTitle(base.Window, Main._cachedTitle);
+ #endif
+ 		}
 @@ -4771,7 +_,7 @@
  		public static void InitLifeBytes()
  		{
@@ -594,36 +616,68 @@
  			}
  			for (int num13 = 0; num13 < 1001; num13++)
  			{
-@@ -7485,7 +_,7 @@
+@@ -7485,8 +_,16 @@
  			{
  				Main.SetGraphicsProfile(GraphicsProfile.HiDef);
  			}
 -			TexturePackSupport.FindTexturePack();
-+			TexturePackSupport.FindTexturePacks();
- 			TextureManager.Initialize();
+-			TextureManager.Initialize();
++
++			try
++			{
++				TexturePackSupport.FindTexturePacks();
++				TextureManager.Initialize();
++			}
++			catch (Exception e)
++			{
++				Logging.Terraria.Error(e.Message, e);
++			}
  			this.mapSectionTexture = new RenderTarget2D(base.GraphicsDevice, 200, 150);
  			Main.ShaderContentManager = new ContentManager(base.Content.ServiceProvider, base.Content.RootDirectory);
-@@ -8254,10 +_,23 @@
+ 			Main.PixelShaderRef.Value = Main.ShaderContentManager.Load<Effect>("PixelShader");
+@@ -7497,8 +_,9 @@
+ 				Main.LoadMusic();
+ 				this.LoadSounds();
+ 			}
+-			catch
+-			{
++			catch(Exception e)
++			{
++				
+ 				Main.musicVolume = 0f;
+ 				Main.soundVolume = 0f;
+ 			}
+@@ -8254,10 +_,29 @@
  		{
  			Main.engine = new AudioEngine("Content" + Path.DirectorySeparatorChar + "TerrariaMusic.xgs");
  			Main.soundBank = new SoundBank(Main.engine, "Content" + Path.DirectorySeparatorChar + "Sound Bank.xsb");
-+
-+
-+
+-			Main.waveBank = new WaveBank(Main.engine, "Content" + Path.DirectorySeparatorChar + "Wave Bank.xwb");
+-			for (int i = 1; i < 42; i++)
+-			{
+-				Main.music[i] = Main.soundBank.GetCue("Music_" + i);
++			
 +			try{
- 			Main.waveBank = new WaveBank(Main.engine, "Content" + Path.DirectorySeparatorChar + "Wave Bank.xwb");
- 			for (int i = 1; i < 42; i++)
- 			{
- 				Main.music[i] = Main.soundBank.GetCue("Music_" + i);
-+			}
++				Main.waveBank = new WaveBank(Main.engine, "Content" + Path.DirectorySeparatorChar + "Wave Bank.xwb");
++				for (int i = 1; i < 42; i++)
++				{
++					Main.music[i] = Main.soundBank.GetCue("Music_" + i);
++				}
 +			}catch(Exception e)
 +			{
-+				if(PlatformUtilities.IsWindows)
++				try
 +				{
-+					WavebankConverter.UpdateContent(Environment.CurrentDirectory + "/Content/Wave Bank.xwb");
-+					LoadMusic(); //re-attempt to load the newly converted wavebank
++					Logging.Terraria.Error(e.Message, e);
++					if (PlatformUtilities.IsWindows)
++					{
++						WavebankConverter.UpdateContent(Environment.CurrentDirectory + "/Content/Wave Bank.xwb", Environment.CurrentDirectory + "/Content/Wave Bank x64.xwb");
++						LoadMusic(); //re-attempt to load the newly converted wavebank
++					}
++					else { throw e; }//If it had an exception and it isn't on windows, it isn't a file format problem.
 +				}
-+				else{throw e;}//If it had an exception and it isn't on windows, it isn't a file format problem.
++				catch (Exception e2)
++				{
++					Logging.Terraria.Error(e2.Message, e2);
++				}
  			}
  		}
  
@@ -3818,6 +3872,15 @@
  						}
  						num21++;
  						array9[num21] = Lang.menu[5].Value;
+@@ -44831,7 +_,7 @@
+ 							flag7 = false;
+ 						}
+ #else
+-						bool flag7 = false;
++						bool flag7 = true;
+ #endif
+ 						num2 = 210;
+ 						num4 = 55;
 @@ -45607,6 +_,10 @@
  							WorldGen.setWorldSize();
  						}
@@ -3853,7 +3916,7 @@
 +				string supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
 +				string patreonShortURL = @"patreon.com/tModLoader";
 +				bool showPatreon = Main.menuMode == 0;
-+				string drawVersion = Main.versionNumber + Environment.NewLine + ModLoader.ModLoader.versionedName + (showPatreon ? Environment.NewLine + supportMessage : "");
++				string drawVersion = Main.versionNumber + Environment.NewLine + ModLoader.ModLoader.versionedName + " - tml FNA " + ((Environment.Is64BitProcess) ? "64bit" : "32bit") + (showPatreon ? Environment.NewLine + supportMessage : "");
 +				Vector2 origin3 = Main.fontMouseText.MeasureString(drawVersion);
  				origin3.X *= 0.5f;
  				origin3.Y *= 0.5f;
@@ -4527,4 +4590,34 @@
  				}
  				return null;
  			}
+@@ -61187,6 +_,29 @@
+ 					}
+ 				}
+ #endif
++				//remove the window decoration, which effectively set it on borderless, for now it requrie to restart the game so change can take effect, also adapt window size to desktop screensize
++				if (Main.screenBorderless && PlatformUtilities.IsFNA)
++				{
++					Main.instance.Window.IsBorderlessEXT = true;
++					SDL2.SDL.SDL_SetWindowPosition(Main.instance.Window.Handle, 0, 0);
++					SDL2.SDL.SDL_DisplayMode display;
++					SDL2.SDL.SDL_GetDesktopDisplayMode(0, out display);
++					SDL2.SDL.SDL_SetWindowSize(Main.instance.Window.Handle, display.w, display.h);
++					Main.screenWidth = display.w;
++					Main.screenHeight = display.h;
++					Main.graphics.PreferredBackBufferWidth = Main.screenWidth;
++					Main.graphics.PreferredBackBufferHeight = Main.screenHeight;
++					Main.PendingResolutionWidth = Main.screenWidth;
++					Main.PendingResolutionHeight = Main.screenHeight;
++					PlayerInput.CacheOriginalScreenDimensions();
++					Main.graphics.ApplyChanges();
++					Main.FixUIScale();
++				}
++				else if (!Main.screenBorderless && !Main.graphics.IsFullScreen)
++				{
++					Main.instance.Window.IsBorderlessEXT = false;
++				}
++
+ 				Lighting.Initialize(true);
+ 				if (!Main.drawToScreen)
+ 				{
 

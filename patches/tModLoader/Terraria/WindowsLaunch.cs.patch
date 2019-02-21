@@ -1,0 +1,60 @@
+--- src/Terraria\Terraria\WindowsLaunch.cs
++++ src/tModLoader\Terraria\WindowsLaunch.cs
+@@ -43,11 +_,46 @@
+ 			}
+ 			return true;
+ 		}
++
++		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
++		[return: MarshalAs(UnmanagedType.Bool)]
++		static extern bool SetDefaultDllDirectories(int directoryFlags);
++
++		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
++		static extern void AddDllDirectory(string lpPathName);
++
++		[DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
++		[return: MarshalAs(UnmanagedType.Bool)]
++		static extern bool SetDllDirectory(string lpPathName);
++
++		const int LOAD_LIBRARY_SEARCH_DEFAULT_DIRS = 0x00001000;
++
+ 		[DllImport("Kernel32")]
+ 		public static extern bool SetConsoleCtrlHandler(WindowsLaunch.HandlerRoutine Handler, bool Add);
+ 		[STAThread]
+ 		private static void Main(string[] args)
+ 		{
++			//Patch the native DLL folder, this will be used for Faudio native dll
++			if (Environment.OSVersion.Platform == PlatformID.Win32NT)
++			{
++				try
++				{
++					SetDefaultDllDirectories(LOAD_LIBRARY_SEARCH_DEFAULT_DIRS);
++					AddDllDirectory(Path.Combine(
++						AppDomain.CurrentDomain.BaseDirectory,
++						Environment.Is64BitProcess ? "x64" : "x86"
++					));
++				}
++				catch
++				{
++					// Pre-Windows 7, KB2533623 
++					SetDllDirectory(Path.Combine(
++						AppDomain.CurrentDomain.BaseDirectory,
++						Environment.Is64BitProcess ? "x64" : "x86"
++					));
++				}
++			}
++
+ 			AppDomain.CurrentDomain.AssemblyResolve += delegate(object sender, ResolveEventArgs sargs)
+ 			{
+ 				string resourceName = new AssemblyName(sargs.Name).Name + ".dll";
+@@ -65,7 +_,8 @@
+ 				}
+ 				return result;
+ 			};
+-			if(Utilities.PlatformUtilities.IsMono)
++			
++			if (Utilities.PlatformUtilities.IsMono)
+ 			{
+ 				Environment.SetEnvironmentVariable("FNA_WORKAROUND_WINDOW_RESIZABLE", "1");
+ 			}
+

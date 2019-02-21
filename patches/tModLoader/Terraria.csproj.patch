@@ -25,11 +25,12 @@
        </PropertyGroup>
      </When>
      <Otherwise>
-@@ -118,23 +_,56 @@
+@@ -117,24 +_,56 @@
+   </Choose>
    <ItemGroup>
      <Reference Include="FNA">
-       <HintPath>..\..\references\FNA.dll</HintPath>
-+      <Private>False</Private>
+-      <HintPath>..\..\references\FNA.dll</HintPath>
++      <HintPath>..\..\..\..\TerrariaFullsource\Tmodloader 64bit 0.11- Beta 1\tModLoader-0.11-beta1-original_patch\references\FNA.dll</HintPath>
 +    </Reference>
 +    <Reference Include="Mono.Cecil">
 +      <HintPath>..\..\references\Mono.Cecil.dll</HintPath>
@@ -283,13 +284,13 @@
      <Compile Include="Terraria\Lang.cs" />
      <Compile Include="Terraria\Lighting.cs" />
      <Compile Include="Terraria\LinuxLaunch.cs" Condition="$(DefineConstants.Contains('LINUX'))" />
-@@ -579,8 +_,40 @@
+@@ -578,9 +_,37 @@
+     <Compile Include="Terraria\ZoomContext.cs" />
    </ItemGroup>
    <ItemGroup>
-     <EmbeddedResource Include="Microsoft.Xna.Framework.RuntimeProfile" />
+-    <EmbeddedResource Include="Microsoft.Xna.Framework.RuntimeProfile" />
 -    <None Include="Terraria.Libraries\DotNetZip\Ionic.Zip.CF.dll" />
 -    <None Include="Terraria.Libraries\JSON.NET\Newtonsoft.Json.dll" />
-+    <EmbeddedResource Include="..\..\references\Ionic.Zip.Reduced.dll" />
 +    <EmbeddedResource Include="Terraria.Libraries\JSON.NET\Newtonsoft.Json.dll" />
 +    <EmbeddedResource Include="Terraria.Libraries\ReLogic\ReLogic.dll" Condition="$(DefineConstants.Contains('WINDOWS'))" />
 +    <EmbeddedResource Include="..\..\references\ReLogicMac.dll" Condition="$(DefineConstants.Contains('MAC'))">
@@ -305,7 +306,6 @@
 +    <EmbeddedResource Include="..\..\references\Steamworks.NET.Linux.dll" Condition="$(DefineConstants.Contains('LINUX'))">
 +      <LogicalName>Terraria.Libraries.Steamworks.NET.Linux.Steamworks.NET.dll</LogicalName>
 +    </EmbeddedResource>
-+    <EmbeddedResource Include="..\..\references\MP3Sharp.dll" />
 +    <EmbeddedResource Include="..\..\references\log4net.dll" />
 +    <EmbeddedResource Include="..\..\references\Mono.Cecil.dll" />
 +    <EmbeddedResource Include="..\..\references\TerrariaHooks.Windows.dll" Condition="$(DefineConstants.Contains('WINDOWS'))">
@@ -318,7 +318,6 @@
 +    <EmbeddedResource Include="..\..\references\MonoMod.Utils.dll" />
 +    <EmbeddedResource Include="..\..\references\FNA.dll" />
 +    <EmbeddedResource Include="..\..\references\ReLogic.dll" />
-+    <EmbeddedResource Include="..\..\references\Newtonsoft.Json.dll" />
 +    <EmbeddedResource Include="..\..\references\Steamworks.NET.Windows64.dll" />
 +    <EmbeddedResource Include="..\..\references\Steamworks.NET.Windows86.dll" />
 +    <EmbeddedResource Include="..\..\references\Steamworks.NET.OSX.dll" />

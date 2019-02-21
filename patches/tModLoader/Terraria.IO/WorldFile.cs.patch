@@ -1,5 +1,15 @@
 --- src/Terraria\Terraria.IO\WorldFile.cs
 +++ src/tModLoader\Terraria.IO\WorldFile.cs
+@@ -3,6 +_,9 @@
+ using System.Collections.Generic;
+ using System.Diagnostics;
+ using System.IO;
++using System.IO.Packaging;
++using Ionic.Zip;
++using Ionic.Zlib;
+ using Terraria.DataStructures;
+ using Terraria.GameContent;
+ using Terraria.GameContent.Events;
 @@ -11,6 +_,8 @@
  using Terraria.Localization;
  using Terraria.Social;
@@ -13,7 +23,7 @@
  			Main.checkXMas();
  			Main.checkHalloween();
  			bool flag = loadFromCloud && SocialAPI.Cloud != null;
-+            //patch file: flag
++			//patch file: flag
  			if (!FileUtilities.Exists(Main.worldPathName, flag) && Main.autoGen)
  			{
  				if (!flag)
@@ -26,7 +36,17 @@
  						if (num2 != 0)
  						{
  							WorldGen.loadFailed = true;
-@@ -402,6 +_,7 @@
+@@ -309,6 +_,9 @@
+ 
+ 		public static void saveWorld(bool useCloudSaving, bool resetTime = false)
+ 		{
++			if(Main.netMode == 0)
++				AutoBackup();
++
+ 			if (useCloudSaving && SocialAPI.Cloud == null)
+ 			{
+ 				return;
+@@ -402,16 +_,110 @@
  				{
  					FileUtilities.WriteAllBytes(text, array2, useCloudSaving);
  				}
@@ -34,7 +54,102 @@
  				WorldGen.saveLock = false;
  			}
  			Main.serverGenLock = false;
-@@ -411,7 +_,7 @@
++		}
++
++		internal static void AutoBackup()
++		{
++			Stopwatch watch = new Stopwatch();
++			watch.Start();
++			if (Main.netMode == 2)
++			{
++				Console.ForegroundColor = ConsoleColor.Green;
++				Console.WriteLine("Backing up current world file...");
++				Console.ResetColor();
++			}
++			else
++			{
++				Main.NewText("Backing up current file...");
++			}
++
++			try
++			{
++				String terrariaPath = Main.SavePath;
++				String backupPath = terrariaPath + "/backup/";
++				String backupWorldPath = backupPath + "/worlds/";
++				String backupPlayerPath = backupPath + "/players/";
++
++				if (!File.Exists(Main.ActiveWorldFileData.Path))
++				{
++					return;
++				}
++
++				if (!Directory.Exists(backupPath))
++				{
++					Directory.CreateDirectory(backupPath);
++					Directory.CreateDirectory(backupWorldPath);
++					Directory.CreateDirectory(backupPlayerPath);
++				}
++
++				using (ZipFile zip = new ZipFile())
++				{
++					zip.AddFile(Main.ActiveWorldFileData.Path);
++					zip.AddFile(Path.ChangeExtension(Main.ActiveWorldFileData.Path, ".twld"));
++					zip.CompressionLevel = CompressionLevel.BestCompression;
++					zip.Save(backupWorldPath + Main.ActiveWorldFileData.Name + "-" +
++					         DateTime.Now.ToString("h-mm-ss tt") + ".zip");
++				}
++
++				if (Main.netMode != 2)
++				{
++					using (ZipFile zip = new ZipFile())
++					{
++						zip.AddFile(Main.ActivePlayerFileData.Path);
++						zip.AddFile(Path.ChangeExtension(Main.ActivePlayerFileData.Path, ".tplr"));
++						zip.CompressionLevel = CompressionLevel.BestCompression;
++						zip.Save(backupPlayerPath + Main.ActivePlayerFileData.Name + "-" +
++						         DateTime.Now.ToString("h-mm-ss tt") + ".zip");
++					}
++				}
++			}
++			catch (Exception e)
++			{
++				watch.Stop();
++				if (Main.netMode == 2)
++				{
++					Console.ForegroundColor = ConsoleColor.Red;
++					Console.WriteLine("And error happened while doing the backup.");
++					Console.WriteLine(e.Message + "\n" + e.StackTrace, Color.Red);
++					Console.ResetColor();
++				}
++				else
++				{
++					Main.NewText("And error happened while doing the backup.", Color.Red);
++					Main.NewText(e.Message + "\n" + e.StackTrace, Color.Red);
++				}
++
++				return;
++			}
++
++
++
++
++
++			watch.Stop();
++			if (Main.netMode == 2)
++			{
++				Console.ForegroundColor = ConsoleColor.Cyan;
++				Console.WriteLine("Done in [" + watch.Elapsed.ToString("c") + "]!");
++				Console.ResetColor();
++			}
++			else
++			{
++				Main.NewText("Done in [" + watch.Elapsed.ToString("c") + "]!", Color.Cyan);
++			}
++
++			
+ 		}
+ 
+ 		public static int LoadWorld_Version1(BinaryReader fileIO)
  		{
  			Main.WorldFileMetadata = FileMetadata.FromCurrentSettings(FileType.World);
  			int num = WorldFile.versionNumber;

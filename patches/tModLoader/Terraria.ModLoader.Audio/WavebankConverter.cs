@@ -62,9 +62,9 @@ namespace Terraria.ModLoader.Audio
 		public const uint XWBHeader = 0x444E4257; // WBND
 		public const uint XWBHeaderX360 = 0x57424E44; // DNBW
 
-		public static void UpdateContent(string path, bool patchXNB = true, bool patchXACT = true, bool patchWindowsMedia = true)
+		public static void UpdateContent(string path, string outputPath, bool patchXNB = true, bool patchXACT = true, bool patchWindowsMedia = true)
 		{
-			PatchContent(path, UpdateWaveBank);
+			PatchContent(path, UpdateWaveBank, false, outputPath);
 			FFmpeg.DeleteFFmpegExe();
 		}
 
