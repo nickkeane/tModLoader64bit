@@ -24,9 +24,9 @@ namespace Terraria.ModLoader
 	/// </summary>
 	public static class ModLoader
 	{
-		public static readonly Version version = new Version(0, 11, 2, 1);
+		public static readonly Version version = new Version(0, 11, 2, 2);
 
-		public static readonly string branchName = "";
+		public static readonly string branchName = "64bit";
 		// beta > 0 cannot publish to mod browser
 		public static readonly int beta = 0;
 
@@ -43,6 +43,8 @@ namespace Terraria.ModLoader
 		public static readonly bool linux = Platform.IsLinux;
 		[Obsolete("Use Platform.IsOSX")]
 		public static readonly bool mac = Platform.IsOSX;
+		//Better having a field to check if the process is in 64bit mode
+		public static readonly bool is64BitProcess = Environment.Is64BitProcess; 
 
 		[Obsolete("Use CompressedPlatformRepresentation instead")]
 		public static readonly string compressedPlatformRepresentation = Platform.IsWindows ? "w" : (Platform.IsLinux ? "l" : "m");

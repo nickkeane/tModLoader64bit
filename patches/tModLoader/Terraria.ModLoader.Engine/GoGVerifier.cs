@@ -30,7 +30,12 @@ namespace Terraria.ModLoader.Engine
 			// but whether I make it byte array or string doesn't change that. I could obfuscate the hash a bit
 			// but I can't really make it more effort than just nuking the steam check with dnspy (which could be done before we added GoG support)
 			if (Platform.IsWindows) {
-				steamAPIpath = "steam_api.dll";
+				if (Environment.Is64BitProcess) {
+					steamAPIpath = "steam_api64.dll";
+				}
+				else {
+					steamAPIpath = "steam_api.dll";
+				}
 				vanillaGoGhash = ToByteArray("81ef4a9337ae6d7a1698fdeb3137580d");
 			}
 			else if (Platform.IsOSX) {

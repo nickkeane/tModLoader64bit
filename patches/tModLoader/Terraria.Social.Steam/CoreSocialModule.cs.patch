@@ -1,0 +1,33 @@
+--- src/Terraria\Terraria.Social.Steam\CoreSocialModule.cs
++++ src/tModLoader\Terraria.Social.Steam\CoreSocialModule.cs
+@@ -3,6 +_,7 @@
+ using System.Threading;
+ using System.Windows.Forms;
+ using Terraria.Localization;
++using Terraria.Utilities;
+ 
+ namespace Terraria.Social.Steam
+ {
+@@ -37,9 +_,9 @@
+ 			ThreadPool.QueueUserWorkItem(new WaitCallback(this.SteamTickLoop), null);
+ 			Main.OnTick += new Action(this.PulseSteamTick);
+ 			Main.OnTick += new Action(this.PulseSteamCallback);
+-#if MAC
+-			this._onOverlayActivated = Callback<GameOverlayActivated_t>.Create(new Callback<GameOverlayActivated_t>.DispatchDelegate(this.OnOverlayActivated));
+-#endif
++			if(PlatformUtilities.IsOSX)
++				this._onOverlayActivated = Callback<GameOverlayActivated_t>.Create(new Callback<GameOverlayActivated_t>.DispatchDelegate(this.OnOverlayActivated));
++
+ 		}
+ 
+ 		public void PulseSteamTick()
+@@ -94,7 +_,7 @@
+ 
+ 		public void Shutdown()
+ 		{
+-#if WINDOWS
++#if XNA
+ 			Application.ApplicationExit += delegate(object obj, EventArgs evt)
+ #else
+ 			this.IsSteamValid = false;
+

@@ -1,10 +1,34 @@
 --- src/Terraria\Terraria\Main.cs
 +++ src/tModLoader\Terraria\Main.cs
-@@ -29,7 +_,9 @@
+@@ -5,7 +_,7 @@
+ using Microsoft.Xna.Framework.Graphics;
+ using Microsoft.Xna.Framework.Input;
+ 
+-#if MAC
++#if FNA
+ using SDL2;
+ #endif
+ using ReLogic.Graphics;
+@@ -16,20 +_,22 @@
+ using System.Collections.Generic;
+ using System.Diagnostics;
+ 
+-#if WINDOWS
++#if XNA
+ using System.Drawing;
+ #endif
+ using System.IO;
+ using System.Linq;
+ using System.Reflection;
+ 
+-#if !WINDOWS
++#if FNA
+ using System.Runtime.CompilerServices;
+ #endif
  using System.Runtime.InteropServices;
  using System.Text;
  using System.Threading;
-+#if WINDOWS
++#if XNA
  using System.Windows.Forms;
 +#endif
  using Terraria.Achievements;
@@ -332,7 +356,7 @@
  		}
  
  		private static void SetGraphicsProfileInternal()
-@@ -2566,12 +_,17 @@
+@@ -2566,12 +_,20 @@
  					Main._renderTargetMaxSize = 2048;
  					break;
  				case GraphicsProfile.HiDef:
@@ -340,16 +364,21 @@
 -					Main.maxScreenH = 4096;
 -					Main._renderTargetMaxSize = 4096;
 -					Main.TrySupporting8K();
+-					break;
+-			}
 +					// update resolution related variables alongside TrySupporting8K
 +					Configuration.Get<bool>("Support8K", ref Support8K);
 +					int hiRes = Support8K ? 8192 : 4096;
 +					Main.maxScreenW = hiRes;
 +					Main.maxScreenH = hiRes;
 +					Main._renderTargetMaxSize = hiRes;
++#if XNA //I know this one here definitely don't work on FNA, as it is supported by default and try to check for a field that is not in FNA
 +					if (Support8K)
 +						Main.TrySupporting8K();
- 					break;
- 			}
++#endif
++					break; 
++
++			}
 +
  			try
  			{
@@ -464,7 +493,27 @@
  			try
  			{
  				string path = Main.PlayerList[i].Path.Substring(0, Main.PlayerList[i].Path.Length - 4);
-@@ -3427,6 +_,7 @@
+@@ -3415,18 +_,20 @@
+ 			{
+ 				if (!Main.WorldList[i].IsCloudSave)
+ 				{
+-#if WINDOWS
+-					FileOperationAPIWrapper.MoveToRecycleBin(Main.WorldList[i].Path);
+-					FileOperationAPIWrapper.MoveToRecycleBin(Main.WorldList[i].Path + ".bak");
+-#else
+-					File.Delete(Main.WorldList[i].Path);
+-					File.Delete(Main.WorldList[i].Path + ".bak");
+-#endif
++					if (PlatformUtilities.IsWindows) {
++						FileOperationAPIWrapper.MoveToRecycleBin(Main.WorldList[i].Path);
++						FileOperationAPIWrapper.MoveToRecycleBin(Main.WorldList[i].Path + ".bak");
++					}
++					else {
++						File.Delete(Main.WorldList[i].Path);
++						File.Delete(Main.WorldList[i].Path + ".bak");
++					}
+ 				}
+ 				else if (SocialAPI.Cloud != null)
  				{
  					SocialAPI.Cloud.Delete(Main.WorldList[i].Path);
  				}
@@ -487,7 +536,7 @@
  							}
  							if (text.Length >= 5 && text.Substring(0, 5).ToLower() == "seed=")
  							{
-@@ -3849,7 +_,7 @@
+@@ -3849,11 +_,11 @@
  		public void DedServ()
  		{
  			Main.rand = new UnifiedRandom();
@@ -496,6 +545,11 @@
  			{
  				string text = "terraria" + Main.rand.Next(2147483647);
  				Console.Title = text;
+-#if WINDOWS
++#if XNA
+ 				IntPtr intPtr = Main.FindWindow(null, text);
+ 				if (intPtr != IntPtr.Zero)
+ 				{
 @@ -3863,18 +_,19 @@
  			}
  			else
@@ -1061,7 +1115,7 @@
  					Liquid.cycles = 1;
  				}
  				Main.hasFocus = base.IsActive;
-+#if WINDOWS
++#if XNA
  				Main.hasFocus = (Form.ActiveForm == Control.FromHandle(base.Window.Handle) as Form);
 +#endif
  				if (!Main.gameMenu || Main.netMode == 2)
@@ -4061,6 +4115,18 @@
  						}
  						flag10 = true;
  					}
+@@ -42618,8 +_,9 @@
+ 			SocialAPI.Shutdown();
+ #endif
+ 			base.Exit();
+-#if MAC
+-			SDL.SDL_DestroyWindow(base.Window.Handle);
++#if FNA
++			if(PlatformUtilities.IsOSX)
++				SDL.SDL_DestroyWindow(base.Window.Handle);
+ #endif
+ 		}
+ 
 @@ -43092,7 +_,7 @@
  				if (this.selectedMenu >= 1)
  				{
@@ -4079,22 +4145,59 @@
  				{
  					num5 = 2;
  					array9[0] = Main.statusText;
-@@ -43400,10 +_,13 @@
- 						{
- 							text = text + " -world \"" + Main.worldPathName + "\"";
+@@ -43382,29 +_,33 @@
+ 								"\" -lang ",
+ 								Language.ActiveCulture.LegacyId
+ 							});
+-#if LINUX
+-						if (IntPtr.Size == 8)
+-						{
+-							text += " -x64";
++						if (PlatformUtilities.IsLinux) {
++							if (IntPtr.Size == 8) {
++								text += " -x64";
++							}
++							else {
++								text += " -x86";
++							}
++						}
++						
++
++						if (Main.ActiveWorldFileData.IsCloudSave)
++						{
++							text = text + " -cloudworld \"" + Main.worldPathName + "\"";
  						}
+ 						else
+ 						{
+-							text += " -x86";
+-						}
+-#endif
+-						if (Main.ActiveWorldFileData.IsCloudSave)
+-						{
+-							text = text + " -cloudworld \"" + Main.worldPathName + "\"";
+-						}
++							text = text + " -world \"" + Main.worldPathName + "\"";
++						}
 +						text = text + " -modpath \"" + ModOrganizer.modPath + "\"";
 +						if (Main.showServerConsole)
 +							text = text + " -showserverconsole";
- #if WINDOWS
++
++						if(PlatformUtilities.IsWindows)
++							this.tServer.StartInfo.FileName = "tModLoaderServer.exe";
+ 						else
+-						{
+-							text = text + " -world \"" + Main.worldPathName + "\"";
+-						}
+-#if WINDOWS
 -						this.tServer.StartInfo.FileName = "TerrariaServer.exe";
-+						this.tServer.StartInfo.FileName = "tModLoaderServer.exe";
- #else
+-#else
 -						this.tServer.StartInfo.FileName = "TerrariaServer";
-+						this.tServer.StartInfo.FileName = "tModLoaderServer";
- #endif
+-#endif
++							this.tServer.StartInfo.FileName = "tModLoaderServer";
++
  						this.tServer.StartInfo.Arguments = text;
  						if (Main.libPath != "")
+ 						{
 @@ -43412,7 +_,7 @@
  							expr_1014.Arguments = expr_1014.Arguments + " -loadlib " + Main.libPath;
  						}
@@ -4248,6 +4351,15 @@
  						}
  						num21++;
  						array9[num21] = Lang.menu[5].Value;
+@@ -44831,7 +_,7 @@
+ 						{
+ 							array7[num27] = 0.85f;
+ 						}
+-#if WINDOWS
++#if XNA
+ 						bool flag7 = true;
+ 						Form form = (Form)Control.FromHandle(Main.instance.Window.Handle);
+ 						System.Drawing.Rectangle bounds = Screen.FromPoint(form.Location).Bounds;
 @@ -45616,6 +_,10 @@
  							WorldGen.setWorldSize();
  						}
@@ -4303,7 +4415,7 @@
  				Main.spriteBatch.DrawString(Main.fontMouseText, text6, new Vector2((float)Main.screenWidth - origin2.X + (float)num107 - 10f, (float)Main.screenHeight - origin2.Y + (float)num108 - 2f), color11, 0f, origin2, 1f, SpriteEffects.None, 0f);
  			}
  			for (int num109 = 0; num109 < 5; num109++)
-@@ -46498,10 +_,29 @@
+@@ -46498,10 +_,30 @@
  				{
  					num111 = 2;
  				}
@@ -4311,6 +4423,7 @@
 +				string supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
 +				string patreonShortURL = @"patreon.com/tModLoader";
 +				bool showPatreon = Main.menuMode == 0;
++
 +				string drawVersion = Main.versionNumber + Environment.NewLine + ModLoader.ModLoader.versionedName + (showPatreon ? Environment.NewLine + supportMessage : "");
 +				Vector2 origin3 = Main.fontMouseText.MeasureString(drawVersion);
  				origin3.X *= 0.5f;
@@ -4382,6 +4495,15 @@
  				this.LoadBackground(array4[0]);
  				this.LoadBackground(array4[1]);
  				this.LoadBackground(array4[2]);
+@@ -49076,7 +_,7 @@
+ 			base.GraphicsDevice.SetRenderTarget(this.backWaterTarget);
+ 			base.GraphicsDevice.Clear(Microsoft.Xna.Framework.Color.Transparent);
+ 			Main.spriteBatch.Begin();
+-#if WINDOWS
++#if XNA
+ 			Main.tileBatch.Begin();
+ #else
+ 			Main.tileBatch.Begin(SpriteSortMode.Texture, BlendState.AlphaBlend);
 @@ -49587,7 +_,12 @@
  				Main.spriteBatch.End();
  				Main.spriteBatch.Begin(SpriteSortMode.Deferred, BlendState.AlphaBlend, SamplerState.PointClamp, DepthStencilState.None, RasterizerState.CullCounterClockwise);
@@ -5031,11 +5153,40 @@
  				}
  				return null;
  #if !WINDOWS
-@@ -61131,7 +_,9 @@
+@@ -61056,7 +_,7 @@
+ 			{
+ 				Main.graphics.ToggleFullScreen();
+ 			}
+-#if WINDOWS
++#if XNA
+ 			Main.screenMaximized = (((Form)Control.FromHandle(Main.instance.Window.Handle)).WindowState == FormWindowState.Maximized);
+ 			if (Main.screenBorderless && Main.screenMaximized && !Main.graphics.IsFullScreen)
+ 			{
+@@ -61077,7 +_,7 @@
+ 			int num4;
+ 			if (Main.screenBorderless || Main.screenMaximized || Main.graphics.IsFullScreen)
+ 			{
+-#if WINDOWS
++#if XNA
+ 				form.MinimumSize = new Size(0, 0);
+ 				if (Main.screenBorderless && !Main.graphics.IsFullScreen && Main.screenBorderlessPendingResizes > 0)
+ 				{
+@@ -61116,7 +_,7 @@
+ 			}
+ 			else
+ 			{
+-#if WINDOWS
++#if XNA
+ 				form.MinimumSize = new Size(Main.minScreenW, Main.minScreenH);
+ 				if (flag)
+ 				{
+@@ -61130,8 +_,10 @@
+ 				num4 = Main.graphics.GraphicsDevice.Viewport.Height;
  				flag2 = (Main.graphics.PreferredBackBufferWidth != Main.graphics.GraphicsDevice.Viewport.Width || Main.graphics.PreferredBackBufferHeight != Main.graphics.GraphicsDevice.Viewport.Height);
  			}
- #if WINDOWS
+-#if WINDOWS
 -			if (!fullscreen && !flag2)
++#if XNA
 +			// appears redundant. Just causes the window to fight the user when attempting to resize too small
 +			// with this disabled, the window will just snap back to minimum size when released
 +			/*if (!fullscreen && !flag2)
@@ -5067,4 +5218,13 @@
  				PlayerInput.CacheOriginalScreenDimensions();
  				Main.FixUIScale();
  				if (Main.OnResolutionChanged != null)
+@@ -61170,7 +_,7 @@
+ 				Main.PendingResolutionWidth = Main.screenWidth;
+ 				Main.PendingResolutionHeight = Main.screenHeight;
+ 				PlayerInput.CacheOriginalScreenDimensions();
+-#if WINDOWS
++#if XNA
+ 				if (!fullscreen)
+ 				{
+ 					form.SendToBack();
 

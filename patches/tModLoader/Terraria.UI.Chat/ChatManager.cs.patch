@@ -1,0 +1,32 @@
+--- src/Terraria\Terraria.UI.Chat\ChatManager.cs
++++ src/tModLoader\Terraria.UI.Chat\ChatManager.cs
+@@ -7,6 +_,7 @@
+ using System.Text.RegularExpressions;
+ using Terraria.Chat;
+ using Terraria.GameContent.UI.Chat;
++using Terraria.Utilities;
+ 
+ namespace Terraria.UI.Chat
+ {
+@@ -48,13 +_,13 @@
+ 			}
+ 		}
+ 
+-		public static void Register<T>(params string[] names) where T : ITagHandler, new()
+-		{
+-#if MAC
+-			T t = Activator.CreateInstance<T>();
+-#else
+-			T t = (default(T) == null) ? Activator.CreateInstance<T>() : default(T);
+-#endif
++		public static void Register<T>(params string[] names) where T : ITagHandler, new() {
++			T t;
++			if(PlatformUtilities.IsOSX)
++				t = Activator.CreateInstance<T>();
++			else
++				t = (default(T) == null) ? Activator.CreateInstance<T>() : default(T);
++
+ 			for (int i = 0; i < names.Length; i++)
+ 			{
+ 				ChatManager._handlers[names[i].ToLower()] = t;
+

@@ -8,6 +8,24 @@
  
  namespace Terraria.Net.Sockets
  {
+@@ -67,7 +_,7 @@
+ 
+ 		private void SendCallback(IAsyncResult result)
+ 		{
+-#if WINDOWS
++#if XNA
+ 			Tuple<SocketSendCallback, object> tuple = (Tuple<SocketSendCallback, object>)result.AsyncState;
+ #else
+ 			object[] expr_0B = (object[])result.AsyncState;
+@@ -91,7 +_,7 @@
+ 
+ 		void ISocket.AsyncSend(byte[] data, int offset, int size, SocketSendCallback callback, object state)
+ 		{
+-#if WINDOWS
++#if XNA
+ 			this._connection.GetStream().BeginWrite(data, 0, size, new AsyncCallback(this.SendCallback), new Tuple<SocketSendCallback, object>(callback, state));
+ #else
+ 			byte[] array = LegacyNetBufferPool.RequestBuffer(data, offset, size);
 @@ -156,7 +_,7 @@
  				try
  				{

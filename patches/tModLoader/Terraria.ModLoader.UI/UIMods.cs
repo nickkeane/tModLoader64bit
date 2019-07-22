@@ -68,13 +68,14 @@ namespace Terraria.ModLoader.UI
 			};
 			uIPanel.Append(modList);
 
-			if (ModLoader.showMemoryEstimates) {
+			//if (ModLoader.showMemoryEstimates) {
 				var ramUsage = new UIMemoryBar() {
 					Top = { Pixels = 45 },
 				};
 				ramUsage.Width.Pixels = -25;
 				uIPanel.Append(ramUsage);
-			}
+				Logging.tML.Info("memory bar loaded");
+			//}
 
 			var uIScrollbar = new UIScrollbar {
 				Height = { Pixels = -50, Percent = 1f },

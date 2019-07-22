@@ -83,6 +83,25 @@
  		}
  
  		public static void ResetSections()
+@@ -225,11 +_,13 @@
+ 				}
+ 				catch
+ 				{
+-#if MAC
+-					Thread.Sleep(200);
+-					Netplay.Connection.Socket.Close();
+-					Netplay.Connection.Socket = new TcpSocket();
+-#endif
++					if (PlatformUtilities.IsOSX) {
++						Thread.Sleep(200);
++						Netplay.Connection.Socket.Close();
++						Netplay.Connection.Socket = new TcpSocket();
++					}
++					
++
+ 					if (!Netplay.disconnect && Main.gameMenu)
+ 					{
+ 						flag = true;
 @@ -241,6 +_,7 @@
  
  		private static void ClientLoopSetup(RemoteAddress address)

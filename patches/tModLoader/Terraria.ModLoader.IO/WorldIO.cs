@@ -503,13 +503,17 @@ namespace Terraria.ModLoader.IO
 		internal static void EraseWorld(string path, bool cloudSave) {
 			path = Path.ChangeExtension(path, ".twld");
 			if (!cloudSave) {
-#if WINDOWS
-				FileOperationAPIWrapper.MoveToRecycleBin(path);
-				FileOperationAPIWrapper.MoveToRecycleBin(path + ".bak");
-#else
-				File.Delete(path);
-				File.Delete(path + ".bak");
-#endif
+				if (PlatformUtilities.IsWindows) {
+					FileOperationAPIWrapper.MoveToRecycleBin(path);
+					FileOperationAPIWrapper.MoveToRecycleBin(path + ".bak");
+				}
+				else
+				{
+					File.Delete(path);
+					File.Delete(path + ".bak");
+				}
+				
+
 			}
 			else if (SocialAPI.Cloud != null) {
 				SocialAPI.Cloud.Delete(path);

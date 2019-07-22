@@ -63,7 +63,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnActivate() {
 			base.OnActivate();
 
-#if WINDOWS
+#if XNA //See with the dev later
 			area.AddOrRemoveChild(autoUpdateButton, !string.IsNullOrEmpty(autoUpdateURL));
 #endif
 		}

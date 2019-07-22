@@ -116,10 +116,10 @@ namespace Terraria.ModLoader.Core
 							LoadAssembly(EncapsulateReferences(modFile.GetBytes("lib/" + dll + ".dll")));
 
 						if (eacEnabled && HasEaC) //load the unmodified dll and EaC pdb
-							assembly = LoadAssembly(modFile.GetModAssembly(), File.ReadAllBytes(properties.eacPath));
+							assembly = LoadAssembly(modFile.GetModAssembly(PlatformUtilities.IsXNA), File.ReadAllBytes(properties.eacPath));
 						else {
 							var pdb = GetModPdb(out var imageDebugHeader);
-							assembly = LoadAssembly(EncapsulateReferences(modFile.GetModAssembly(), imageDebugHeader), pdb);
+							assembly = LoadAssembly(EncapsulateReferences(modFile.GetModAssembly(PlatformUtilities.IsXNA), imageDebugHeader), pdb);
 						}
 						NeedsReload = false;
 					}
@@ -131,7 +131,7 @@ namespace Terraria.ModLoader.Core
 			}
 
 			private byte[] GetModPdb(out ImageDebugHeader header) {
-				var fileName = modFile.GetModAssemblyFileName();
+				var fileName = modFile.GetModAssemblyFileName(PlatformUtilities.IsXNA);
 
 				// load a separate debug header to splice into the assembly (dll provided was precompiled and references non-cecil symbols)
 				if (modFile.HasFile(fileName + ".cecildebugheader"))
