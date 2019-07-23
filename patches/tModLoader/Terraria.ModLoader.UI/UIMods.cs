@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Terraria.GameContent.UI.Elements;
 using Terraria.Localization;
@@ -40,6 +40,7 @@ namespace Terraria.ModLoader.UI
 		private UIAutoScaleTextTextPanel<string> buttonB;
 		private UIAutoScaleTextTextPanel<string> buttonOMF;
 		private UIAutoScaleTextTextPanel<string> buttonMP;
+		private CancellationTokenSource _cts;
 
 		public override void OnInitialize() {
 			uIElement = new UIElement {
@@ -53,7 +54,7 @@ namespace Terraria.ModLoader.UI
 			uIPanel = new UIPanel {
 				Width = { Percent = 1f },
 				Height = { Pixels = -110, Percent = 1f },
-				BackgroundColor = UICommon.mainPanelBackground,
+				BackgroundColor = UICommon.MainPanelBackground,
 				PaddingTop = 0f
 			};
 			uIElement.Append(uIPanel);
@@ -89,7 +90,7 @@ namespace Terraria.ModLoader.UI
 			var uIHeaderTexTPanel = new UITextPanel<string>(Language.GetTextValue("tModLoader.ModsModsList"), 0.8f, true) {
 				HAlign = 0.5f,
 				Top = { Pixels = -35 },
-				BackgroundColor = UICommon.defaultUIBlue
+				BackgroundColor = UICommon.DefaultUIBlue
 			}.WithPadding(15f);
 			uIElement.Append(uIHeaderTexTPanel);
 
@@ -133,7 +134,7 @@ namespace Terraria.ModLoader.UI
 			buttonOMF.OnClick += OpenModsFolder;
 			uIElement.Append(buttonOMF);
 
-			var texture = UICommon.modBrowserIconsTexture;
+			var texture = UICommon.ModBrowserIconsTexture;
 			var upperMenuContainer = new UIElement {
 				Width = { Percent = 1f },
 				Height = { Pixels = 32 },
@@ -230,8 +231,7 @@ namespace Terraria.ModLoader.UI
 		private static void BackClick(UIMouseEvent evt, UIElement listeningElement) {
 			Main.PlaySound(11, -1, -1, 1);
 			// To prevent entering the game with Configs that violate ReloadRequired
-			if (ConfigManager.AnyModNeedsReload())
-			{
+			if (ConfigManager.AnyModNeedsReload()) {
 				Main.menuMode = Interface.reloadModsID;
 				return;
 			}
@@ -272,6 +272,10 @@ namespace Terraria.ModLoader.UI
 			}
 		}
 
+		public UIModItem FindUIModItem(string modName) {
+			return items.FirstOrDefault(m => m.ModName == modName);
+		}
+
 		public override void Update(GameTime gameTime) {
 			base.Update(gameTime);
 			if (needToRemoveLoading) {
@@ -283,12 +287,13 @@ namespace Terraria.ModLoader.UI
 			filter = filterTextBox.Text;
 			modList.Clear();
 			modList.AddRange(items.Where(item => item.PassFilters()));
+			Recalculate();
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) {
 			base.Draw(spriteBatch);
-			for (int i = 0; i < this._categoryButtons.Count; i++) {
-				if (this._categoryButtons[i].IsMouseHovering) {
+			for (int i = 0; i < _categoryButtons.Count; i++) {
+				if (_categoryButtons[i].IsMouseHovering) {
 					string text;
 					switch (i) {
 						case 0:
@@ -315,6 +320,7 @@ namespace Terraria.ModLoader.UI
 		}
 
 		public override void OnActivate() {
+			_cts = new CancellationTokenSource();
 			Main.clrInput();
 			modList.Clear();
 			items.Clear();
@@ -324,19 +330,26 @@ namespace Terraria.ModLoader.UI
 			Populate();
 		}
 
+		public override void OnDeactivate() {
+			_cts?.Cancel(false);
+			_cts?.Dispose();
+			_cts = null;
+		}
+
 		internal void Populate() {
 			Task.Factory
-				.StartNew(ModOrganizer.FindMods)
+				.StartNew(ModOrganizer.FindMods, _cts.Token)
 				.ContinueWith(task => {
 					var mods = task.Result;
 					foreach (var mod in mods) {
 						UIModItem modItem = new UIModItem(mod);
+						modItem.Activate();
 						items.Add(modItem);
 					}
 					needToRemoveLoading = true;
 					updateNeeded = true;
 					loading = false;
-				}, TaskScheduler.FromCurrentSynchronizationContext());
+				}, _cts.Token, TaskContinuationOptions.None, TaskScheduler.FromCurrentSynchronizationContext());
 		}
 	}
 

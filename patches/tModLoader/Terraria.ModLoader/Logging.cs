@@ -253,6 +253,8 @@ namespace Terraria.ModLoader
 			"at Terraria.Lighting.doColors_Mode1_Swipe",
 			"at Terraria.Lighting.doColors_Mode2_Swipe",
 			"at Terraria.Lighting.doColors_Mode3_Swipe",
+			"System.Threading.CancellationToken.ThrowOperationCanceledException", // an operation (task) was deliberately cancelled
+			"System.Threading.CancellationToken.ThrowIfCancellationRequested", // an operation (task) was deliberately cancelled
 		};
 
 		public static void IgnoreExceptionContents(string source) {
@@ -265,8 +267,8 @@ namespace Terraria.ModLoader
 			if (args.Exception == previousException ||
 				args.Exception is ThreadAbortException ||
 				ignoreSources.Contains(args.Exception.Source) ||
-				ignoreMessages.Any(str => args.Exception.Message.Contains(str)) ||
-				ignoreStackTraces.Any(str => args.Exception.StackTrace.Contains(str)))
+				ignoreMessages.Any(str => args.Exception.Message?.Contains(str) ?? false) ||
+				ignoreStackTraces.Any(str => args.Exception.StackTrace?.Contains(str) ?? false))
 				return;
 
 			var stackTrace = new StackTrace(true);

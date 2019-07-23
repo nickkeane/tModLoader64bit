@@ -24,7 +24,7 @@ namespace Terraria.ModLoader
 	/// </summary>
 	public static class ModLoader
 	{
-		public static readonly Version version = new Version(0, 11, 2, 2);
+		public static readonly Version version = new Version(0, 11, 3);
 
 		public static readonly string branchName = "64bit";
 		// beta > 0 cannot publish to mod browser
@@ -106,7 +106,7 @@ namespace Terraria.ModLoader
 
 		internal static void BeginLoad(CancellationToken token) => Task.Run(() => Load(token));
 
-		internal static void Load(CancellationToken token) {
+		internal static void Load(CancellationToken token = default) {
 			try {
 				var modInstances = ModOrganizer.LoadMods(token);
 
@@ -126,6 +126,10 @@ namespace Terraria.ModLoader
 					Main.menuMode = 0;
 				}
 			}
+			catch when (token.IsCancellationRequested) {
+				if (Unload())
+					Main.menuMode = Interface.modsMenuID;
+			}
 			catch (Exception e) {
 				var responsibleMods = new List<string>();
 				if (e.Data.Contains("mod"))
@@ -136,15 +140,6 @@ namespace Terraria.ModLoader
 
 				if (responsibleMods.Count == 0 && AssemblyManager.FirstModInStackTrace(new StackTrace(e), out var stackMod))
 					responsibleMods.Add(stackMod);
-
-				// If e is of type OperationCancelledException the loading action was cancelled
-				// It should only be thrown at points where it's safe to begin unloading all mods
-				if (e is OperationCanceledException) {
-					foreach (var mod in responsibleMods) 
-						DisableMod(mod);
-					Unload();
-					return;
-				}
 
 				var msg = Language.GetTextValue("tModLoader.LoadError", string.Join(", ", responsibleMods));
 				if (responsibleMods.Count == 1) {
@@ -185,13 +180,41 @@ namespace Terraria.ModLoader
 		}
 
 		internal static void Reload() {
-			try {
-				Unload();
+			if (!Unload())
+				return;
 
-				if (Main.dedServ)
-					Load(new CancellationTokenSource().Token);
-				else
-					Main.menuMode = Interface.loadModsProgressID;
+			if (Main.dedServ)
+				Load();
+			else
+				Main.menuMode = Interface.loadModsProgressID;
+		}
+
+		internal static List<string> badUnloaders = new List<string>();
+		private static bool Unload() {
+			try {
+				Logging.tML.Info("Unloading mods");
+				if (Main.dedServ) {
+					Console.WriteLine("Unloading mods...");
+				} else {
+					Main.menuMode = Interface.unloadModsID;
+					Interface.unloadModsProgress.SetLoadStage("tModLoader.MSUnloading", Mods.Length);
+				}
+
+				ModContent.UnloadModContent();
+				Mods = new Mod[0];
+				modsByName.Clear();
+				ModContent.Unload();
+			
+				MemoryTracking.Clear();
+				Thread.MemoryBarrier();
+				GC.Collect();
+				badUnloaders.Clear();
+				foreach (var mod in weakModReferences.Where(r => r.IsAlive).Select(r => (Mod)r.Target)) {
+					Logging.tML.WarnFormat("{0} not fully unloaded during unload.", mod.Name);
+					badUnloaders.Add(mod.Name);
+				}
+
+				return true;
 			}
 			catch (Exception e) {
 				var msg = Language.GetTextValue("tModLoader.UnloadError");
@@ -201,27 +224,8 @@ namespace Terraria.ModLoader
 
 				Logging.tML.Fatal(msg, e);
 				DisplayLoadError(msg, e, true);
-			}
-		}
 
-		internal static List<string> badUnloaders = new List<string>();
-		private static void Unload() {
-			Logging.tML.Info("Unloading mods");
-			if (Main.dedServ)
-				Console.WriteLine("Unloading mods...");
-
-			ModContent.UnloadModContent();
-			Mods = new Mod[0];
-			modsByName.Clear();
-			ModContent.Unload();
-			
-			MemoryTracking.Clear();
-			Thread.MemoryBarrier();
-			GC.Collect();
-			badUnloaders.Clear();
-			foreach (var mod in weakModReferences.Where(r => r.IsAlive).Select(r => (Mod)r.Target)) {
-				Logging.tML.WarnFormat("{0} not fully unloaded during unload.", mod.Name);
-				badUnloaders.Add(mod.Name);
+				return false;
 			}
 		}
 
