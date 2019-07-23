@@ -77,9 +77,9 @@
    </PropertyGroup>
 -  <PropertyGroup Condition="$(Configuration.Contains('Server'))">
 +  <PropertyGroup Condition="$(Configuration.Contains('FNARelease'))">
-+    <Optimize>false</Optimize>
++    <Optimize>true</Optimize>
 +    <PlatformTarget>AnyCPU</PlatformTarget>
-+    <DefineConstants>DEBUG;TRACE;CLIENT;FNA</DefineConstants>
++    <DefineConstants>TRACE;CLIENT;FNA</DefineConstants>
 +    <OutputName>$(OutputName)Release</OutputName>
 +    <ApplicationIcon>IconFNA.ico</ApplicationIcon>
      <OutputType>Exe</OutputType>

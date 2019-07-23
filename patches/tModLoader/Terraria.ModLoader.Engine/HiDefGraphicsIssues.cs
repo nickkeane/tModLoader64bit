@@ -48,11 +48,13 @@ namespace Terraria.ModLoader.Engine
 			f_MaxTextureSize.SetValue(f_ProfileCapabilities_Reach.GetValue(null), 4096);
 #endif
 #if DEBUG && XNA
-	        mainThreadId = Thread.CurrentThread.ManagedThreadId;
+			//This here won't work on FNA
 	        new Hook(typeof(Texture2D).FindMethod("ValidateCreationParameters"), new hook_ValidateCreationParameters(HookValidateCreationParameters));
 #endif
-			Console.WriteLine(typeof(Texture2D));
-        }
+#if DEBUG
+	        mainThreadId = Thread.CurrentThread.ManagedThreadId;
+#endif
+		}
 
 		private delegate bool orig_CanResetDevice(GraphicsDeviceManager self, GraphicsDeviceInformation newDeviceInfo);
 		private delegate bool hook_CanResetDevice(orig_CanResetDevice orig, GraphicsDeviceManager self, GraphicsDeviceInformation newDeviceInfo);
