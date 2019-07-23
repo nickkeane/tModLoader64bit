@@ -70,7 +70,7 @@ namespace Terraria.ModLoader.Setup
 			if(!path.StartsWith(basePath))
 				throw new ArgumentException("Path \""+path+"\" is not relative to \""+basePath+"\"");
 
-			return $@"{path.Substring(basePath.Length)}";
+			return path.Substring(basePath.Length);
 		}
 
 		public static void CreateDirectory(string dir) {
