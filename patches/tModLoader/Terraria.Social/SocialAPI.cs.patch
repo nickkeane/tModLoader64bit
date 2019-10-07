@@ -10,19 +10,33 @@
  
  namespace Terraria.Social
  {
-@@ -29,7 +_,11 @@
+@@ -27,20 +_,16 @@
+ 		{
+ 			if (!mode.HasValue)
  			{
- 				mode = new SocialMode?(SocialMode.None);
- #if CLIENT
+-				mode = new SocialMode?(SocialMode.None);
+-#if CLIENT
 -				mode = new SocialMode?(SocialMode.Steam);
-+#if DEBUG
+-#else
+-				if (Program.LaunchParameters.ContainsKey("-steam"))
+-				{
+-					mode = new SocialMode?(SocialMode.Steam);
+-				}
++				mode = (GoGVerifier.IsGoG) ? new SocialMode?(SocialMode.None) : new SocialMode?(SocialMode.Steam);
++
++#if CLIENT && DEBUG
 +                if (!Program.LaunchParameters.ContainsKey("-nosteam"))
-+#endif
-+				//if (!GoGVerifier.IsGoG)
-+					mode = new SocialMode?(SocialMode.Steam);
- #else
- 				if (Program.LaunchParameters.ContainsKey("-steam"))
- 				{
++					mode = new SocialMode?(SocialMode.None);
+ #endif
+ 			}
+ 			SocialAPI._mode = mode.Value;
+ 			SocialAPI._modules = new List<ISocialModule>();
+-			SocialMode mode2 = SocialAPI.Mode;
+-			if (mode2 == SocialMode.Steam)
++			if (mode == SocialMode.Steam)
+ 			{
+ 				SocialAPI.LoadSteam();
+ 			}
 @@ -59,13 +_,13 @@
  			}
  		}
@@ -38,7 +52,7 @@
 +			T t;
 +			if(PlatformUtilities.IsOSX)
 +				t = Activator.CreateInstance<T>();
-+			else 
++			else
 +				t = (default(T) == null) ? Activator.CreateInstance<T>() : default(T);
 +
  			SocialAPI._modules.Add(t);

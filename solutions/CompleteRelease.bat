@@ -4,7 +4,7 @@
 @ECHO off
 :: Compile/Build exe 
 echo "Building Release"
-set version=v0.11.3
+set version=v0.11.4
 call buildRelease.bat
 
 set destinationFolder=.\tModLoader %version% Release
@@ -55,6 +55,8 @@ copy "%steamdir%\ModCompile" "%mcfna%"
 del "%mcfna%"\buildlock 2>nul
 copy ..\src\tModLoader\bin\WindowsRelease\net45\Terraria.xml "%mcfna%" /y
 copy ..\src\tModLoader\bin\WindowsRelease\net45\tModLoader.pdb "%mcfna%" /y
+copy ..\references\MonoMod.RuntimeDetour.xml "%mcfna%" /y
+copy ..\references\MonoMod.Utils.xml "%mcfna%" /y
 
 call zipjs.bat zipDirItems -source "%mcfna%" -destination "%mcfna%.zip" -keep yes -force yes
 

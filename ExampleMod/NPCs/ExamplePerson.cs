@@ -213,7 +213,7 @@ namespace ExampleMod.NPCs
 				shop.item[nextSlot].SetDefaults(mod.ItemType("ExampleHealingPotion"));
 				nextSlot++;
 			}
-			if (Main.LocalPlayer.GetModPlayer<ExamplePlayer>().ZoneExample && !ExampleMod.exampleServerConfig.DisableExampleWings) {
+			if (Main.LocalPlayer.GetModPlayer<ExamplePlayer>().ZoneExample && !ExampleConfigServer.Instance.DisableExampleWings) {
 				shop.item[nextSlot].SetDefaults(mod.ItemType("ExampleWings"));
 				nextSlot++;
 			}
@@ -240,13 +240,13 @@ namespace ExampleMod.NPCs
 				nextSlot++;
 			}
 
-			if (!Main.LocalPlayer.GetModPlayer<ExamplePlayer>().examplePersonGiftReceived && ExampleMod.exampleServerConfig.ExamplePersonFreeGiftList != null)
+			if (!Main.LocalPlayer.GetModPlayer<ExamplePlayer>().examplePersonGiftReceived && ExampleConfigServer.Instance.ExamplePersonFreeGiftList != null)
 			{
-				foreach (var item in ExampleMod.exampleServerConfig.ExamplePersonFreeGiftList)
+				foreach (var item in ExampleConfigServer.Instance.ExamplePersonFreeGiftList)
 				{
 					if (item.IsUnloaded)
 						continue;
-					shop.item[nextSlot].SetDefaults(item.GetID());
+					shop.item[nextSlot].SetDefaults(item.Type);
 					shop.item[nextSlot].shopCustomPrice = 0;
 					shop.item[nextSlot].GetGlobalItem<ExampleInstancedGlobalItem>().examplePersonFreeGift = true;
 					nextSlot++;

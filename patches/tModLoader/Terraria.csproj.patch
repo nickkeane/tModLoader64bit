@@ -17,33 +17,40 @@
 +    <LangVersion>7.3</LangVersion>
      <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
      <OutputType>WinExe</OutputType>
-+    <PlatformTarget>x86</PlatformTarget>
-+    <Optimize>true</Optimize>
+     <PlatformTarget>AnyCPU</PlatformTarget>
+     <Optimize>true</Optimize>
 +    <OutputName>tModLoader</OutputName>
-+  </PropertyGroup>
+   </PropertyGroup>
+-  <PropertyGroup Condition="$(Configuration.Contains('Server'))">
 +  <PropertyGroup Condition="$(Configuration.Contains('FNAServerRelease'))">
-+    <OutputType>Exe</OutputType>
+     <OutputType>Exe</OutputType>
+-    <DefineConstants>$(DefineConstants);SERVER</DefineConstants>
 +    <DefineConstants>TRACE;SERVER;FNA</DefineConstants>
 +    <ApplicationIcon>IconFNAServer.ico</ApplicationIcon>
 +    <OutputName>$(OutputName)Server</OutputName>
-+  </PropertyGroup>
+   </PropertyGroup>
+-  <PropertyGroup Condition="!$(Configuration.Contains('Server'))">
+-    <DefineConstants>$(DefineConstants);CLIENT</DefineConstants>
 +  <PropertyGroup Condition="$(Configuration.Contains('XNAServerRelease'))">
 +  <OutputType>Exe</OutputType>
 +    <DefineConstants>DEBUG;TRACE;SERVER;XNA</DefineConstants>
 +    <ApplicationIcon>IconXNA.ico</ApplicationIcon>
 +    <OutputName>$(OutputName)Server</OutputName>
-+  </PropertyGroup>
+   </PropertyGroup>
+-  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
 +  <PropertyGroup Condition="$(Configuration.Contains('XNAServerDebug'))">
-+    <Optimize>false</Optimize>
+     <Optimize>false</Optimize>
+-    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
 +    <PlatformTarget>x86</PlatformTarget>
 +    <DefineConstants>TRACE;DEBUG;SERVER;XNA</DefineConstants>
 +    <OutputName>$(OutputName)Debug</OutputName>
 +    <ApplicationIcon>IconXNA.ico</ApplicationIcon>
 +    <OutputType>Exe</OutputType>
-+  </PropertyGroup>
+   </PropertyGroup>
+-  <PropertyGroup Condition="$(Configuration.Contains('Windows'))">
 +  <PropertyGroup Condition="$(Configuration.Contains('FNAServerDebug'))">
 +    <Optimize>false</Optimize>
-     <PlatformTarget>AnyCPU</PlatformTarget>
++    <PlatformTarget>AnyCPU</PlatformTarget>
 +    <DefineConstants>TRACE;DEBUG;DSERVER;FNA</DefineConstants>
 +    <OutputName>$(OutputName)Debug</OutputName>
 +    <ApplicationIcon>IconFNAServer.ico</ApplicationIcon>
@@ -52,7 +59,7 @@
 +  <PropertyGroup Condition="$(Configuration.Contains('XNADebug'))">
 +    <Optimize>false</Optimize>
 +    <AssemblySearchPaths>$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
-+    <PlatformTarget>x86</PlatformTarget>
+     <PlatformTarget>x86</PlatformTarget>
 +    <DefineConstants>TRACE;DEBUG;CLIENT;XNA</DefineConstants>
 +    <OutputName>$(OutputName)Debug</OutputName>
 +    <ApplicationIcon>IconXNA.ico</ApplicationIcon>
@@ -60,50 +67,37 @@
 +  </PropertyGroup>
 +  <PropertyGroup Condition="$(Configuration.Contains('FNADebug'))">
 +    <Optimize>false</Optimize>
-+    <AssemblySearchPaths>$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
+     <AssemblySearchPaths>$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
+-    <DefineConstants>$(DefineConstants);WINDOWS;XNA</DefineConstants>
 +    <PlatformTarget>AnyCPU</PlatformTarget>
 +    <DefineConstants>TRACE;DEBUG;CLIENT;FNA</DefineConstants>
 +    <OutputName>$(OutputName)Debug</OutputName>
 +    <ApplicationIcon>IconFNA.ico</ApplicationIcon>
 +    <OutputType>WinExe</OutputType>
-+  </PropertyGroup>
+   </PropertyGroup>
+-  <PropertyGroup Condition="$(Configuration.Contains('Mac'))">
+-    <DefineConstants>$(DefineConstants);MAC;FNA</DefineConstants>
 +  <PropertyGroup Condition="$(Configuration.Contains('XNARelease'))">
-     <Optimize>true</Optimize>
++    <Optimize>true</Optimize>
 +    <PlatformTarget>x86</PlatformTarget>
 +    <DefineConstants>TRACE;CLIENT;XNA</DefineConstants>
 +    <OutputName>$(OutputName)Release</OutputName>
 +    <ApplicationIcon>IconXNA.ico</ApplicationIcon>
 +    <OutputType>Exe</OutputType>
    </PropertyGroup>
--  <PropertyGroup Condition="$(Configuration.Contains('Server'))">
+-  <PropertyGroup Condition="$(Configuration.Contains('Linux'))">
+-    <DefineConstants>$(DefineConstants);LINUX;FNA</DefineConstants>
 +  <PropertyGroup Condition="$(Configuration.Contains('FNARelease'))">
 +    <Optimize>true</Optimize>
 +    <PlatformTarget>AnyCPU</PlatformTarget>
 +    <DefineConstants>TRACE;CLIENT;FNA</DefineConstants>
 +    <OutputName>$(OutputName)Release</OutputName>
 +    <ApplicationIcon>IconFNA.ico</ApplicationIcon>
-     <OutputType>Exe</OutputType>
--    <DefineConstants>$(DefineConstants);SERVER</DefineConstants>
-   </PropertyGroup>
--  <PropertyGroup Condition="!$(Configuration.Contains('Server'))">
--    <DefineConstants>$(DefineConstants);CLIENT</DefineConstants>
++    <OutputType>Exe</OutputType>
++  </PropertyGroup>
 +  <PropertyGroup>
 +    <PdbFile>bin\$(OutputName)</PdbFile>
-   </PropertyGroup>
--  <PropertyGroup Condition="$(Configuration.Contains('Debug'))">
--    <Optimize>false</Optimize>
--    <DefineConstants>$(DefineConstants);DEBUG</DefineConstants>
--  </PropertyGroup>
--  <PropertyGroup Condition="$(Configuration.Contains('Windows'))">
--    <PlatformTarget>x86</PlatformTarget>
--    <AssemblySearchPaths>$(AssemblySearchPaths);{GAC}</AssemblySearchPaths>
--    <DefineConstants>$(DefineConstants);WINDOWS;XNA</DefineConstants>
--  </PropertyGroup>
--  <PropertyGroup Condition="$(Configuration.Contains('Mac'))">
--    <DefineConstants>$(DefineConstants);MAC;FNA</DefineConstants>
--  </PropertyGroup>
--  <PropertyGroup Condition="$(Configuration.Contains('Linux'))">
--    <DefineConstants>$(DefineConstants);LINUX;FNA</DefineConstants>
++  </PropertyGroup>
 +  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='XNADebug|AnyCPU'">
 +    <Prefer32Bit>false</Prefer32Bit>
    </PropertyGroup>
@@ -189,10 +183,18 @@
      </Reference>
      <Reference Include="WindowsBase" />
    </ItemGroup>
-@@ -216,6 +_,7 @@
+@@ -216,6 +_,15 @@
      <Compile Include="Terraria.GameContent.UI.Elements\UIList.cs" />
      <Compile Include="Terraria.GameContent.UI.Elements\UIPanel.cs" />
      <Compile Include="Terraria.GameContent.UI.Elements\UIProgressBar.cs" />
++    <Compile Include="Terraria.ModLoader.Config.UI\DefinitionElement.cs" />
++    <Compile Include="Terraria.ModLoader.Config.UI\NPCDefinitionElement.cs" />
++    <Compile Include="Terraria.ModLoader.Config.UI\PrefixDefinitionElement.cs" />
++    <Compile Include="Terraria.ModLoader.Config.UI\ProjectileDefinitionElement.cs" />
++    <Compile Include="Terraria.ModLoader.Config\EntityDefinition.cs" />
++    <Compile Include="Terraria.ModLoader.Core\LogArchiver.cs" />
++    <Compile Include="Terraria.ModLoader.Core\LoggingHooks.cs" />
++    <Compile Include="Terraria.ModLoader.Core\ZipExtractFix.cs" />
 +    <Compile Include="Terraria.ModLoader.UI.DownloadManager\UIUnloadModsProgress.cs" />
      <Compile Include="Terraria.GameContent.UI.Elements\UIScrollbar.cs" />
      <Compile Include="Terraria.GameContent.UI.Elements\UIText.cs" />
@@ -213,7 +215,7 @@
      <Compile Include="Terraria.ID\NPCID.cs" />
      <Compile Include="Terraria.ID\PlayerTextureID.cs" />
      <Compile Include="Terraria.ID\PlayerVariantID.cs" />
-@@ -339,6 +_,235 @@
+@@ -339,6 +_,234 @@
      <Compile Include="Terraria.Map\MapHelper.cs" />
      <Compile Include="Terraria.Map\MapTile.cs" />
      <Compile Include="Terraria.Map\WorldMap.cs" />
@@ -237,7 +239,6 @@
 +    <Compile Include="Terraria.ModLoader.Config.UI\UIModConfig.cs" />
 +    <Compile Include="Terraria.ModLoader.Config.UI\UIModConfigList.cs" />
 +    <Compile Include="Terraria.ModLoader.Config.UI\Vector2Element.cs" />
-+    <Compile Include="Terraria.ModLoader.Config\ItemDefinition.cs" />
 +    <Compile Include="Terraria.ModLoader.Config\ConfigAttributes.cs" />
 +    <Compile Include="Terraria.ModLoader.Config\ModConfig.cs" />
 +    <Compile Include="Terraria.ModLoader.Config\ConfigManager.cs" />

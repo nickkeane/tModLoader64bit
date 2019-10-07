@@ -364,8 +364,6 @@
 -					Main.maxScreenH = 4096;
 -					Main._renderTargetMaxSize = 4096;
 -					Main.TrySupporting8K();
--					break;
--			}
 +					// update resolution related variables alongside TrySupporting8K
 +					Configuration.Get<bool>("Support8K", ref Support8K);
 +					int hiRes = Support8K ? 8192 : 4096;
@@ -376,7 +374,8 @@
 +					if (Support8K)
 +						Main.TrySupporting8K();
 +#endif
-+					break; 
+ 					break;
+-			}
 +
 +			}
 +
@@ -4161,7 +4160,7 @@
 +								text += " -x86";
 +							}
 +						}
-+						
++
 +
 +						if (Main.ActiveWorldFileData.IsCloudSave)
 +						{
@@ -4415,7 +4414,7 @@
  				Main.spriteBatch.DrawString(Main.fontMouseText, text6, new Vector2((float)Main.screenWidth - origin2.X + (float)num107 - 10f, (float)Main.screenHeight - origin2.Y + (float)num108 - 2f), color11, 0f, origin2, 1f, SpriteEffects.None, 0f);
  			}
  			for (int num109 = 0; num109 < 5; num109++)
-@@ -46498,10 +_,30 @@
+@@ -46498,10 +_,31 @@
  				{
  					num111 = 2;
  				}
@@ -4423,8 +4422,9 @@
 +				string supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
 +				string patreonShortURL = @"patreon.com/tModLoader";
 +				bool showPatreon = Main.menuMode == 0;
-+
-+				string drawVersion = Main.versionNumber + Environment.NewLine + ModLoader.ModLoader.versionedName + (showPatreon ? Environment.NewLine + supportMessage : "");
++				string architecture = $"(Running in {((Environment.Is64BitProcess) ? 64.ToString() : 32.ToString())} bit mode)";
++				string GoG = GoGVerifier.IsGoG ? "GoG" : "Steam";
++				string drawVersion = Main.versionNumber + Environment.NewLine + ModLoader.ModLoader.versionedName + $" - {architecture} {GoG} {PlatformUtilities.RunningPlatform()}" + (showPatreon ? Environment.NewLine + supportMessage : "");
 +				Vector2 origin3 = Main.fontMouseText.MeasureString(drawVersion);
  				origin3.X *= 0.5f;
  				origin3.Y *= 0.5f;

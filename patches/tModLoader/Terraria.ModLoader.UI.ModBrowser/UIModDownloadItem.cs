@@ -15,6 +15,7 @@ using Terraria.Localization;
 using Terraria.ModLoader.Core;
 using Terraria.ModLoader.UI.DownloadManager;
 using Terraria.UI;
+using Terraria.UI.Chat;
 
 namespace Terraria.ModLoader.UI.ModBrowser
 {
@@ -24,6 +25,7 @@ namespace Terraria.ModLoader.UI.ModBrowser
 
 		public readonly string ModName;
 		public readonly string DisplayName;
+		public readonly string DisplayNameClean; // No chat tags: for search and sort functionality.
 		public readonly string DownloadUrl;
 		public readonly bool HasUpdate;
 		public readonly bool UpdateIsDowngrade;
@@ -68,12 +70,15 @@ namespace Terraria.ModLoader.UI.ModBrowser
 		public UIModDownloadItem(string displayName, string name, string version, string author, string modReferences, ModSide modSide, string modIconUrl, string downloadUrl, int downloads, int hot, string timeStamp, bool hasUpdate, bool updateIsDowngrade, LocalMod installed, string modloaderversion) {
 			ModName = name;
 			DisplayName = displayName;
+			DisplayNameClean = string.Join("", ChatManager.ParseMessage(displayName, Color.White).Where(x=> x.GetType() == typeof(TextSnippet)).Select(x => x.Text));
 			DownloadUrl = downloadUrl;
 
 			_author = author;
 			_modReferences = modReferences;
 			_modSide = modSide;
 			_modIconUrl = modIconUrl;
+			if (UIModBrowser.AvoidImgur)
+				_modIconUrl = null;
 			_downloads = downloads;
 			_hot = hot;
 			_timeStamp = timeStamp;
@@ -194,9 +199,9 @@ namespace Terraria.ModLoader.UI.ModBrowser
 				default:
 					return base.CompareTo(obj);
 				case ModBrowserSortMode.DisplayNameAtoZ:
-					return string.Compare(DisplayName, item?.DisplayName, StringComparison.Ordinal);
+					return string.Compare(DisplayNameClean, item?.DisplayNameClean, StringComparison.Ordinal);
 				case ModBrowserSortMode.DisplayNameZtoA:
-					return -1 * string.Compare(DisplayName, item?.DisplayName, StringComparison.Ordinal);
+					return -1 * string.Compare(DisplayNameClean, item?.DisplayNameClean, StringComparison.Ordinal);
 				case ModBrowserSortMode.DownloadsAscending:
 					return _downloads.CompareTo(item?._downloads);
 				case ModBrowserSortMode.DownloadsDescending:
@@ -217,7 +222,7 @@ namespace Terraria.ModLoader.UI.ModBrowser
 					if (_author.IndexOf(Interface.modBrowser.Filter, StringComparison.OrdinalIgnoreCase) == -1)
 						return false;
 				}
-				else if (DisplayName.IndexOf(Interface.modBrowser.Filter, StringComparison.OrdinalIgnoreCase) == -1
+				else if (DisplayNameClean.IndexOf(Interface.modBrowser.Filter, StringComparison.OrdinalIgnoreCase) == -1
 					&& ModName.IndexOf(Interface.modBrowser.Filter, StringComparison.OrdinalIgnoreCase) == -1)
 					return false;
 			}
@@ -234,6 +239,8 @@ namespace Terraria.ModLoader.UI.ModBrowser
 					return HasUpdate || Installed == null;
 				case UpdateFilter.UpdateOnly:
 					return HasUpdate;
+				case UpdateFilter.InstalledOnly:
+					return Installed != null;
 			}
 		}
 
@@ -310,19 +317,25 @@ namespace Terraria.ModLoader.UI.ModBrowser
 		}
 
 		private void IconDownloadComplete(object sender, DownloadDataCompletedEventArgs e) {
+			bool success = false;
 			try {
-				byte[] data = e.Result;
-				using (var buffer = new MemoryStream(data)) {
-					var iconTexture = Texture2D.FromStream(Main.instance.GraphicsDevice, buffer);
-					_modIcon = new UIImage(iconTexture) {
-						Left = { Percent = 0f },
-						Top = { Percent = 0f }
-					};
-					_modIconStatus = ModIconStatus.READY;
+				if (!e.Cancelled && e.Error == null) {
+					byte[] data = e.Result;
+					using (var buffer = new MemoryStream(data)) {
+						var iconTexture = Texture2D.FromStream(Main.instance.GraphicsDevice, buffer);
+						_modIcon = new UIImage(iconTexture) {
+							Left = { Percent = 0f },
+							Top = { Percent = 0f }
+						};
+						_modIconStatus = ModIconStatus.READY;
+						success = true;
+					}
 				}
 			}
 			catch {
 				// country- wide imgur blocks, cannot load icon
+			}
+			if (!success) {
 				_modIconStatus = ModIconStatus.APPENDED;
 				_modName.Left.Pixels -= ModIconAdjust;
 				_moreInfoButton.Left.Pixels -= ModIconAdjust;

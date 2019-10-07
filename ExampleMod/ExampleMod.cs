@@ -22,13 +22,8 @@ namespace ExampleMod
 {
 	public class ExampleMod : Mod
 	{
-		public const string CaptiveElementHead = "ExampleMod/NPCs/Abomination/CaptiveElement_Head_Boss_";
-		public const string CaptiveElement2Head = "ExampleMod/NPCs/Abomination/CaptiveElement2_Head_Boss_";
-
 		public static ModHotKey RandomBuffHotKey;
 		public static int FaceCustomCurrencyId;
-		internal static ExampleConfigClient exampleClientConfig;
-		internal static ExampleConfigServer exampleServerConfig;
 		// With the new fonts in 1.3.5, font files are pretty big now so you need to generate the font file before building the mod.
 		// You can use https://forums.terraria.org/index.php?threads/dynamicspritefontgenerator-0-4-generate-fonts-without-xna-game-studio.57127/ to make dynamicspritefonts
 		public static DynamicSpriteFont exampleFont;
@@ -63,12 +58,6 @@ namespace ExampleMod
 			// In older tModLoader versions we used: ErrorLogger.Log("blabla");
 			// Replace that with above
 
-			// Adds boss head textures for the Abomination boss
-			for (int k = 1; k <= 4; k++) {
-				AddBossHeadTexture(CaptiveElementHead + k);
-				AddBossHeadTexture(CaptiveElement2Head + k);
-			}
-
 			// Registers a new hotkey
 			RandomBuffHotKey = RegisterHotKey("Random Buff", "P"); // See https://docs.microsoft.com/en-us/previous-versions/windows/xna/bb197781(v%3dxnagamestudio.41) for special keys
 
@@ -84,9 +73,6 @@ namespace ExampleMod
 				AddEquipTexture(new Items.Armor.BlockyHead(), null, EquipType.Head, "BlockyHead", "ExampleMod/Items/Armor/ExampleCostume_Head");
 				AddEquipTexture(new Items.Armor.BlockyBody(), null, EquipType.Body, "BlockyBody", "ExampleMod/Items/Armor/ExampleCostume_Body", "ExampleMod/Items/Armor/ExampleCostume_Arms");
 				AddEquipTexture(new Items.Armor.BlockyLegs(), null, EquipType.Legs, "BlockyLeg", "ExampleMod/Items/Armor/ExampleCostume_Legs");
-
-				// Change the vanilla dungeon track
-				// Main.music[MusicID.Dungeon] = GetMusic("Sounds/Music/DriveMusic");
 
 				// Register a new music box
 				AddMusicBox(GetSoundSlot(SoundType.Music, "Sounds/Music/MarbleGallery"), ItemType("ExampleMusicBox"), TileType("ExampleMusicBox"));
@@ -146,7 +132,6 @@ namespace ExampleMod
 		public override void Unload() {
 			// All code below runs only if we're not loading on a server
 			if (!Main.dedServ) {
-				// Main.music[MusicID.Dungeon] = Main.soundBank.GetCue("Music_" + MusicID.Dungeon);
 				Main.tileFrame[TileID.Loom] = 0; // Reset the frame of the loom tile
 				Main.tileSetsLoaded[TileID.Loom] = false; // Causes the loom tile to reload its vanilla texture
 			}
@@ -156,8 +141,6 @@ namespace ExampleMod
 			// In addition to that, if you want your mod to completely unload during unload, you need to clear static references to anything referencing your Mod class
 			Instance = null;
 			RandomBuffHotKey = null;
-			exampleClientConfig = null;
-			exampleServerConfig = null;
 		}
 
 		public override void PostSetupContent() {

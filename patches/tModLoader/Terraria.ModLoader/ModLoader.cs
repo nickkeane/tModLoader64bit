@@ -24,9 +24,9 @@ namespace Terraria.ModLoader
 	/// </summary>
 	public static class ModLoader
 	{
-		public static readonly Version version = new Version(0, 11, 3);
+		public static readonly Version version = new Version(0, 11, 4);
 
-		public static readonly string branchName = "64bit";
+		public static readonly string branchName = "";
 		// beta > 0 cannot publish to mod browser
 		public static readonly int beta = 0;
 
@@ -102,6 +102,7 @@ namespace Terraria.ModLoader
 			GLCallLocker.Init();
 			HiDefGraphicsIssues.Init();
 			MonoModHooks.Initialize();
+			ZipExtractFix.Init();
 		}
 
 		internal static void BeginLoad(CancellationToken token) => Task.Run(() => Load(token));
@@ -296,6 +297,7 @@ namespace Terraria.ModLoader
 			Main.Configuration.Put("RemoveForcedMinimumZoom", removeForcedMinimumZoom);
 			Main.Configuration.Put("ShowMemoryEstimates", showMemoryEstimates);
 			Main.Configuration.Put("AvoidGithub", UI.ModBrowser.UIModBrowser.AvoidGithub);
+			Main.Configuration.Put("AvoidImgur", UI.ModBrowser.UIModBrowser.AvoidImgur);
 		}
 
 		internal static void LoadConfiguration() {
@@ -309,6 +311,7 @@ namespace Terraria.ModLoader
 			Main.Configuration.Get("RemoveForcedMinimumZoom", ref removeForcedMinimumZoom);
 			Main.Configuration.Get("ShowMemoryEstimates", ref showMemoryEstimates);
 			Main.Configuration.Get("AvoidGithub", ref UI.ModBrowser.UIModBrowser.AvoidGithub);
+			Main.Configuration.Get("AvoidImgur", ref UI.ModBrowser.UIModBrowser.AvoidImgur);
 		}
 
 		/// <summary>
