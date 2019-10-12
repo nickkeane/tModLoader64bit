@@ -32,10 +32,6 @@ namespace ExampleMod
 		// You MUST specify a ConfigScope.
 		public override ConfigScope Mode => ConfigScope.ServerSide;
 
-		// tModLoader will automatically populate a public static field named Instance with the active instance of this ModConfig. (It will unload it too.)
-		// This reduces code from "mod.GetConfig<ExampleConfigServer>().DisableExampleWings" to "ExampleConfigServer.Instance.DisableExampleWings". It's just a style choice.
-		public static ExampleConfigServer Instance;
-
 		// We will use attributes to annotate our fields or properties so tModLoader can properly handle them.
 
 		// First, we will learn about DefaultValue. You might assume "public bool BoolExample = true;" to work, 
@@ -99,8 +95,6 @@ namespace ExampleMod
 	public class ExampleConfigClient : ModConfig
 	{
 		public override ConfigScope Mode => ConfigScope.ClientSide;
-
-		public static ExampleConfigClient Instance; // See ExampleConfigServer.Instance for info.
 
 		[Label("Show the coin rate UI")]
 		public bool ShowCoinUI;
@@ -239,6 +233,9 @@ namespace ExampleMod
 		[Label("$Mods.ExampleMod.Common.LocalizedLabel")]
 		[Tooltip("$Mods.ExampleMod.Common.LocalizedTooltip")]
 		public int LocalizedLabel;
+
+		[Label("$Mods.ExampleMod.Common.LocalizedLabelDynamic")]
+		public int LocalizedLabelDynamic;
 
 		// The color of the config entry can be customized. R, G, B
 		[BackgroundColor(255, 0, 255)]
@@ -511,6 +508,11 @@ namespace ExampleMod
 		[Label("Custom UI Element 2")]
 		// In this case, CustomModConfigItem is annotating the Enum instead of the Field. Either is acceptable and can be used for different situations.
 		public Corner corner;
+
+		// You can put multiple attributes in the same [] if you like.
+		// ColorHueSliderAttribute displayes Hue Saturation Lightness. Passing in false means only Hue is shown.
+		[DefaultValue(typeof(Color), "255, 0, 0, 255"), ColorHSLSlider(false), ColorNoAlpha]  
+		public Color hsl;
 
 		// In this example we inherit from a tmodloader config UIElement to slightly customize the colors.
 		[CustomModConfigItem(typeof(CustomFloatElement))]

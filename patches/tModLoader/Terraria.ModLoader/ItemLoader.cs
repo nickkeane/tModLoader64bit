@@ -259,6 +259,40 @@ namespace Terraria.ModLoader
 			return -1;
 		}
 
+		private static HookList HookPrefixChance = AddHook<Func<Item, int, UnifiedRandom, bool?>>(g => g.PrefixChance);
+
+		/// <summary>
+		/// Allows for blocking, forcing and altering chance of prefix rolling.
+		/// False (block) takes precedence over True (force)
+		/// Null gives vanilla behaviour
+		/// </summary>
+		public static bool? PrefixChance(Item item, int pre, UnifiedRandom rand) {
+			bool? result = null;
+			foreach (var g in HookPrefixChance.arr) {
+				bool? r = g.Instance(item).PrefixChance(item, pre, rand);
+				if (r.HasValue)
+					result = r.Value && (result ?? true);
+			}
+			if (item.modItem != null) {
+				bool? r = item.modItem.PrefixChance(pre, rand);
+				if (r.HasValue)
+					result = r.Value && (result ?? true);
+			}
+			return result;
+		}
+
+		private static HookList HookAllowPrefix = AddHook<Func<Item, int, bool>>(g => g.AllowPrefix);
+		public static bool AllowPrefix(Item item, int pre) {
+			bool result = true;
+			foreach (var g in HookAllowPrefix.arr) {
+				result &= g.Instance(item).AllowPrefix(item, pre);
+			}
+			if (item.modItem != null) {
+				result &= item.modItem.AllowPrefix(pre);
+			}
+			return result;
+		}
+
 		private static HookList HookCanUseItem = AddHook<Func<Item, Player, bool>>(g => g.CanUseItem);
 		//in Terraria.Player.ItemCheck
 		//  inside block if (this.controlUseItem && this.itemAnimation == 0 && this.releaseUseItem && item.useStyle > 0)
@@ -576,14 +610,17 @@ namespace Terraria.ModLoader
 		/// <param name="knockBack">The projectile knock back.</param>
 		/// <returns></returns>
 		public static bool Shoot(Item item, Player player, ref Vector2 position, ref float speedX, ref float speedY, ref int type, ref int damage, ref float knockBack) {
-			foreach (var g in HookShoot.arr)
-				if (!g.Instance(item).Shoot(item, player, ref position, ref speedX, ref speedY, ref type, ref damage, ref knockBack))
-					return false;
+			bool result = true;
 
-			if (item.modItem != null && !item.modItem.Shoot(player, ref position, ref speedX, ref speedY, ref type, ref damage, ref knockBack))
-				return false;
+			foreach (var g in HookShoot.arr) {
+				result &= g.Instance(item).Shoot(item, player, ref position, ref speedX, ref speedY, ref type, ref damage, ref knockBack);
+			}
 
-			return true;
+			if (result && item.modItem != null) {
+				return item.modItem.Shoot(player, ref position, ref speedX, ref speedY, ref type, ref damage, ref knockBack);
+			}
+
+			return result;
 		}
 
 		private delegate void DelegateUseItemHitbox(Item item, Player player, ref Rectangle hitbox, ref bool noHitbox);
@@ -1069,11 +1106,14 @@ namespace Terraria.ModLoader
 		/// Calls each GlobalItem.PreOpenVanillaBag hook until one of them returns false. Returns true if all of them returned true.
 		/// </summary>
 		public static bool PreOpenVanillaBag(string context, Player player, int arg) {
+			bool result = true;
 			foreach (var g in HookPreOpenVanillaBag.arr)
-				if (!g.PreOpenVanillaBag(context, player, arg)) {
-					NPCLoader.blockLoot.Clear(); // clear blockloot
-					return false;
-				}
+				result &= g.PreOpenVanillaBag(context, player, arg);
+
+			if (!result) {
+				NPCLoader.blockLoot.Clear(); // clear blockloot
+				return false;
+			}
 
 			return true;
 		}
@@ -1184,7 +1224,7 @@ namespace Terraria.ModLoader
 				return false;
 
 			foreach (var g in HookDrawBody.arr)
-				if (!g.DrawBody(player.head))
+				if (!g.DrawBody(player.body))
 					return false;
 
 			return true;

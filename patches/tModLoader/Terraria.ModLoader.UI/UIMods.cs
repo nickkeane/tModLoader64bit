@@ -23,6 +23,7 @@ namespace Terraria.ModLoader.UI
 		private UILoaderAnimatedImage uiLoader;
 		private bool needToRemoveLoading;
 		private UIList modList;
+		private float modListViewPosition;
 		private readonly List<UIModItem> items = new List<UIModItem>();
 		private bool updateNeeded;
 		public bool loading;
@@ -288,6 +289,7 @@ namespace Terraria.ModLoader.UI
 			modList.Clear();
 			modList.AddRange(items.Where(item => item.PassFilters()));
 			Recalculate();
+			modList.ViewPosition = modListViewPosition;
 		}
 
 		public override void Draw(SpriteBatch spriteBatch) {
@@ -334,6 +336,7 @@ namespace Terraria.ModLoader.UI
 			_cts?.Cancel(false);
 			_cts?.Dispose();
 			_cts = null;
+			modListViewPosition = modList.ViewPosition;
 		}
 
 		internal void Populate() {

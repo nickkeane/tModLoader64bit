@@ -1,10 +1,10 @@
 ﻿using Microsoft.Xna.Framework;
 using MonoMod.Cil;
 using System;
-using System.Linq;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
+using static Terraria.ModLoader.ModContent;
 
 namespace ExampleMod.NPCs
 {
@@ -129,7 +129,7 @@ namespace ExampleMod.NPCs
 			//npc.catchItem = 2007;
 
 			npc.CloneDefaults(NPCID.GlowingSnail);
-			npc.catchItem = (short)mod.ItemType<ExampleCritterItem>();
+			npc.catchItem = (short)ItemType<ExampleCritterItem>();
 			npc.lavaImmune = true;
 			//npc.aiStyle = 0;
 			npc.friendly = true; // We have to add this and CanBeHitByItem/CanBeHitByProjectile because of reasons.
@@ -189,6 +189,23 @@ namespace ExampleMod.NPCs
 			return base.PreAI();
 		}
 
+		public override void OnCatchNPC(Player player, Item item) {
+			item.stack = 2;
+
+			try {
+				var npcCenter = npc.Center.ToTileCoordinates();
+				if (!WorldGen.SolidTile(npcCenter.X, npcCenter.Y) && Main.tile[npcCenter.X, npcCenter.Y].liquid == 0) {
+					Main.tile[npcCenter.X, npcCenter.Y].liquid = (byte)Main.rand.Next(50, 150);
+					Main.tile[npcCenter.X, npcCenter.Y].lava(true);
+					Main.tile[npcCenter.X, npcCenter.Y].honey(false);
+					WorldGen.SquareTileFrame(npcCenter.X, npcCenter.Y, true);
+				}
+			}
+			catch {
+				return;
+			}
+		}
+
 		// TODO: Hooks for Collision_MoveSnailOnSlopes and npc.aiStyle = 67 problem
 	}
 
@@ -214,7 +231,7 @@ namespace ExampleMod.NPCs
 
 			item.CloneDefaults(ItemID.GlowingSnail);
 			item.bait = 17;
-			item.makeNPC = (short)mod.NPCType<ExampleCritterNPC>();
+			item.makeNPC = (short)NPCType<ExampleCritterNPC>();
 		}
 	}
 }

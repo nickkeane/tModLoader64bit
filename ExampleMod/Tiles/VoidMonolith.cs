@@ -5,6 +5,7 @@ using Terraria.DataStructures;
 using Terraria.ID;
 using Terraria.ModLoader;
 using Terraria.ObjectData;
+using static Terraria.ModLoader.ModContent;
 
 namespace ExampleMod.Tiles
 {
@@ -25,7 +26,7 @@ namespace ExampleMod.Tiles
 		}
 
 		public override void KillMultiTile(int i, int j, int frameX, int frameY) {
-			Item.NewItem(i * 16, j * 16, 32, 48, mod.ItemType("VoidMonolith"));
+			Item.NewItem(i * 16, j * 16, 32, 48, ItemType<Items.Placeable.VoidMonolith>());
 		}
 
 		public override void NearbyEffects(int i, int j, bool closer) {
@@ -63,16 +64,17 @@ namespace ExampleMod.Tiles
 			return false;
 		}
 
-		public override void RightClick(int i, int j) {
+		public override bool NewRightClick(int i, int j) {
 			Main.PlaySound(SoundID.Mech, i * 16, j * 16, 0);
 			HitWire(i, j);
+			return true;
 		}
 
 		public override void MouseOver(int i, int j) {
 			Player player = Main.LocalPlayer;
 			player.noThrow = 2;
 			player.showItemIcon = true;
-			player.showItemIcon2 = mod.ItemType("VoidMonolith");
+			player.showItemIcon2 = ItemType<Items.Placeable.VoidMonolith>();
 		}
 
 		public override void HitWire(int i, int j) {

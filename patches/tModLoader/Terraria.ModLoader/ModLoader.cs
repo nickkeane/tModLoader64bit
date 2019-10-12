@@ -16,6 +16,7 @@ using Terraria.ModLoader.Audio;
 using Terraria.ModLoader.Core;
 using Terraria.ModLoader.Default;
 using Terraria.ModLoader.Engine;
+using Terraria.ModLoader.UI;
 
 namespace Terraria.ModLoader
 {
@@ -24,7 +25,11 @@ namespace Terraria.ModLoader
 	/// </summary>
 	public static class ModLoader
 	{
-		public static readonly Version version = new Version(0, 11, 4);
+		public static readonly Version version = new Version(0, 11, 5);
+		// Stores the most recent version of tModLoader launched. Can be used for migration.
+		public static Version LastLaunchedTModLoaderVersion;
+		// public static bool ShowWhatsNew;
+		public static bool ShowFirstLaunchWelcomeMessage;
 
 		public static readonly string branchName = "";
 		// beta > 0 cannot publish to mod browser
@@ -107,8 +112,16 @@ namespace Terraria.ModLoader
 
 		internal static void BeginLoad(CancellationToken token) => Task.Run(() => Load(token));
 
-		internal static void Load(CancellationToken token = default) {
+		private static bool isLoading = false;
+		private static void Load(CancellationToken token = default) {
 			try {
+				if (isLoading)
+					throw new Exception("Load called twice");
+				isLoading = true;
+
+				if (!Unload())
+					return;
+
 				var modInstances = ModOrganizer.LoadMods(token);
 
 				weakModReferences = modInstances.Select(x => new WeakReference(x)).ToArray();
@@ -144,7 +157,7 @@ namespace Terraria.ModLoader
 
 				var msg = Language.GetTextValue("tModLoader.LoadError", string.Join(", ", responsibleMods));
 				if (responsibleMods.Count == 1) {
-					var mod = ModOrganizer.FindMods().SingleOrDefault(m => m.Name == responsibleMods[0]);
+					var mod = ModOrganizer.FindMods().FirstOrDefault(m => m.Name == responsibleMods[0]); //use First rather than Single, incase of "Two mods with the same name" error message from ModOrganizer (#639)
 					if (mod != null && mod.tModLoaderVersion != version)
 						msg += "\n" + Language.GetTextValue("tModLoader.LoadErrorVersionMessage", mod.tModLoaderVersion, versionedName);
 				}
@@ -152,13 +165,19 @@ namespace Terraria.ModLoader
 					msg += "\n" + Language.GetTextValue("tModLoader.LoadErrorDisabled");
 				else
 					msg += "\n" + Language.GetTextValue("tModLoader.LoadErrorCulpritUnknown");
-				
+
+				if (e is ReflectionTypeLoadException reflectionTypeLoadException)
+					msg += "\n\n" + string.Join("\n", reflectionTypeLoadException.LoaderExceptions.Select(x => x.Message));
+
 				Logging.tML.Error(msg, e);
 
 				foreach (var mod in responsibleMods)
 					DisableMod(mod);
 
 				DisplayLoadError(msg, e, e.Data.Contains("fatal"), responsibleMods.Count == 0);
+			}
+			finally {
+				isLoading = false;
 			}
 		}
 
@@ -168,7 +187,7 @@ namespace Terraria.ModLoader
 
 			var msg = Language.GetTextValue("tModLoader.LoadErrorDotNet45Required");
 #if CLIENT
-			MessageBox.Show(msg);
+			Interface.MessageBoxShow(msg);
 			Process.Start("https://www.microsoft.com/net/download/thank-you/net472");
 #else
 			Console.ForegroundColor = ConsoleColor.Red;
@@ -181,24 +200,23 @@ namespace Terraria.ModLoader
 		}
 
 		internal static void Reload() {
-			if (!Unload())
-				return;
-
 			if (Main.dedServ)
 				Load();
 			else
-				Main.menuMode = Interface.loadModsProgressID;
+				Main.menuMode = Interface.loadModsID;
 		}
 
 		internal static List<string> badUnloaders = new List<string>();
 		private static bool Unload() {
+			if (Mods.Length == 0)
+				return true;
+
 			try {
 				Logging.tML.Info("Unloading mods");
 				if (Main.dedServ) {
 					Console.WriteLine("Unloading mods...");
 				} else {
-					Main.menuMode = Interface.unloadModsID;
-					Interface.unloadModsProgress.SetLoadStage("tModLoader.MSUnloading", Mods.Length);
+					Interface.loadMods.SetLoadStage("tModLoader.MSUnloading", Mods.Length);
 				}
 
 				ModContent.UnloadModContent();
@@ -298,6 +316,7 @@ namespace Terraria.ModLoader
 			Main.Configuration.Put("ShowMemoryEstimates", showMemoryEstimates);
 			Main.Configuration.Put("AvoidGithub", UI.ModBrowser.UIModBrowser.AvoidGithub);
 			Main.Configuration.Put("AvoidImgur", UI.ModBrowser.UIModBrowser.AvoidImgur);
+			Main.Configuration.Put("LastLaunchedTModLoaderVersion", version.ToString());
 		}
 
 		internal static void LoadConfiguration() {
@@ -312,6 +331,21 @@ namespace Terraria.ModLoader
 			Main.Configuration.Get("ShowMemoryEstimates", ref showMemoryEstimates);
 			Main.Configuration.Get("AvoidGithub", ref UI.ModBrowser.UIModBrowser.AvoidGithub);
 			Main.Configuration.Get("AvoidImgur", ref UI.ModBrowser.UIModBrowser.AvoidImgur);
+		}
+
+		internal static void MigrateSettings() {
+			if (LastLaunchedTModLoaderVersion != null) return;
+
+			LastLaunchedTModLoaderVersion = new Version(Main.Configuration.Get("LastLaunchedTModLoaderVersion", "0.0"));
+			if(LastLaunchedTModLoaderVersion <= new Version(0, 11, 4))
+				Main.Configuration.Put("Support4K", true); // This reverts a potentially bad setting change. 
+			// Subsequent migrations here.
+			/*
+			if (LastLaunchedTModLoaderVersion < version)
+				ShowWhatsNew = true;
+			*/
+			if (LastLaunchedTModLoaderVersion == new Version(0, 0))
+				ShowFirstLaunchWelcomeMessage = true;
 		}
 
 		/// <summary>
