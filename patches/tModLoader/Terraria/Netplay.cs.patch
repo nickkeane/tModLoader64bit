@@ -97,7 +97,7 @@
 +						Netplay.Connection.Socket.Close();
 +						Netplay.Connection.Socket = new TcpSocket();
 +					}
-+					
++
 +
  					if (!Netplay.disconnect && Main.gameMenu)
  					{

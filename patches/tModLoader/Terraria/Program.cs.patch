@@ -106,7 +106,7 @@
  			}
 +
 +			LaunchParameters = Utils.ParseArguements(args);
-+			
++
 +			typeof(ReLogic.OS.Platform).GetField("Current", BindingFlags.Static | BindingFlags.Public).SetValue(null, new UniversalPlatform(PlatformType.Linux));
 +			SavePath =
 +				LaunchParameters.ContainsKey("-tmlsavedirectory") ? LaunchParameters["-tmlsavedirectory"] :
@@ -115,18 +115,18 @@
 +
 +			try {
 +				Logging.Init();
-+				
++
 +			} catch (Exception e) {
 +				DisplayException(e);
 +				return;
 +			}
-+			
++
 +			LaunchGame_();
 +		}
 +
 +		public static void LaunchGame_()
 +		{
-+			
++
  			if (Platform.IsOSX)
  			{
  				Main.OnEngineLoad += delegate

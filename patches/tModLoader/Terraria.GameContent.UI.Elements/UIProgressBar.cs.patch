@@ -1,0 +1,86 @@
+--- src/Terraria\Terraria.GameContent.UI.Elements\UIProgressBar.cs
++++ src/tModLoader\Terraria.GameContent.UI.Elements\UIProgressBar.cs
+@@ -1,46 +_,54 @@
+ using Microsoft.Xna.Framework;
+ using Microsoft.Xna.Framework.Graphics;
+-using System;
++using Terraria.GameContent.UI.Elements;
+ using Terraria.UI;
+ 
+-namespace Terraria.GameContent.UI.Elements
++namespace Terraria.ModLoader.UI
+ {
+-	public class UIProgressBar : UIElement
++	internal class UIProgressBar : UIPanel
+ 	{
+-		private class UIInnerProgressBar : UIElement
+-		{
+-			protected override void DrawSelf(SpriteBatch spriteBatch)
+-			{
+-				CalculatedStyle dimensions = base.GetDimensions();
+-				spriteBatch.Draw(Main.magicPixel, new Vector2(dimensions.X, dimensions.Y), null, Color.Blue, 0f, Vector2.Zero, new Vector2(dimensions.Width, dimensions.Height / 1000f), SpriteEffects.None, 0f);
++		private string _cachedText = "";
++
++		public string DisplayText {
++			get => _textPanel?.Text ?? _cachedText;
++			set {
++				if (_textPanel == null) _cachedText = value;
++				else _textPanel.SetText(value ?? _textPanel.Text);
+ 			}
+ 		}
+ 
+-		private UIProgressBar.UIInnerProgressBar _progressBar = new UIProgressBar.UIInnerProgressBar();
+-		private float _visualProgress;
+-		private float _targetProgress;
++		public float Progress { get; private set; } = 0f;
+ 
+-		public UIProgressBar()
+-		{
+-			this._progressBar.Height.Precent = 1f;
+-			this._progressBar.Recalculate();
+-			base.Append(this._progressBar);
++		private UIAutoScaleTextTextPanel<string> _textPanel;
++
++		public override void OnInitialize() {
++			_textPanel = new UIAutoScaleTextTextPanel<string>(_cachedText ?? "", 1f, true) {
++				Top = { Pixels = 10 },
++				HAlign = 0.5f,
++				Width = { Percent = 1 },
++				Height = { Pixels = 60 },
++				DrawPanel = false
++			};
++			Append(_textPanel);
+ 		}
+ 
+-		public void SetProgress(float value)
+-		{
+-			this._targetProgress = value;
+-			if (value < this._visualProgress)
+-			{
+-				this._visualProgress = value;
++		public override void Update(GameTime gameTime) {
++			base.Update(gameTime);
++
++			// Sometimes the element gets initialized before the cache is set
++			if (!string.IsNullOrEmpty(_cachedText) && _textPanel != null) {
++				_textPanel.SetText(_cachedText);
++				_cachedText = string.Empty;
+ 			}
+ 		}
+ 
+-		protected override void DrawSelf(SpriteBatch spriteBatch)
+-		{
+-			this._visualProgress = this._visualProgress * 0.95f + 0.05f * this._targetProgress;
+-			this._progressBar.Width.Precent = this._visualProgress;
+-			this._progressBar.Recalculate();
++		protected override void DrawSelf(SpriteBatch spriteBatch) {
++			base.DrawSelf(spriteBatch);
++			CalculatedStyle space = GetInnerDimensions();
++			spriteBatch.Draw(Main.magicPixel, new Rectangle((int)space.X + 10, (int)space.Y + (int)space.Height / 2 + 20, (int)space.Width - 20, 10), new Rectangle(0, 0, 1, 1), new Color(0, 0, 70));
++			spriteBatch.Draw(Main.magicPixel, new Rectangle((int)space.X + 10, (int)space.Y + (int)space.Height / 2 + 20, (int)((space.Width - 20) * Progress), 10), new Rectangle(0, 0, 1, 1), new Color(200, 200, 70));
+ 		}
++
++		public void UpdateProgress(float value) => Progress = value;
+ 	}
+-}
++}
