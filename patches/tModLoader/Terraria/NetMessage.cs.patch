@@ -6,12 +6,13 @@
  using Microsoft.Xna.Framework;
  using Microsoft.Xna.Framework.Graphics.PackedVector;
  using System;
-@@ -11,6 +_,8 @@
+@@ -11,6 +_,9 @@
  using Terraria.ID;
  using Terraria.IO;
  using Terraria.Localization;
 +using Terraria.ModLoader;
 +using Terraria.ModLoader.IO;
++using Terraria.ModLoader.x64bit.Core;
  using Terraria.Net;
  using Terraria.Net.Sockets;
  using Terraria.Social;
@@ -35,12 +36,15 @@
  			}
  			lock (NetMessage.buffer[num])
  			{
-@@ -70,13 +_,13 @@
+@@ -70,13 +_,16 @@
  				switch (msgType)
  				{
  					case 1:
 -						writer.Write("Terraria" + 193);
-+						writer.Write(ModLoader.ModLoader.versionedName);
++						if(!Core64.vanillaMode)
++							writer.Write(ModLoader.ModLoader.versionedName);
++						else 
++							writer.Write(Core64.vanillaVersion);
  						break;
  					case 2:
  						text.Serialize(writer);
@@ -51,11 +55,12 @@
  						}
  						break;
  					case 3:
-@@ -178,6 +_,7 @@
+@@ -178,6 +_,8 @@
  							writer.Write((short)num2);
  							writer.Write((byte)number3);
  							writer.Write((short)netID);
-+							ItemIO.SendModData(item, writer);
++							if(!Core64.vanillaMode)
++								ItemIO.SendModData(item, writer);
  							break;
  						}
  					case 7:
@@ -82,15 +87,19 @@
  									}
  									if (tile.liquid > 0 && Main.netMode == 2)
  									{
-@@ -491,6 +_,7 @@
+@@ -491,6 +_,11 @@
  								value = (short)item2.netID;
  							}
  							writer.Write(value);
-+							ItemIO.SendModData(item2, writer);
++							if (!Core64.vanillaMode) {
++								ItemIO.SendModData(item2, writer);
++							}
++
++							
  							break;
  						}
  					case 22:
-@@ -550,10 +_,11 @@
+@@ -550,10 +_,12 @@
  									writer.Write((sbyte)num9);
  								}
  							}
@@ -99,7 +108,8 @@
  							{
  								writer.Write((byte)nPC.releaseOwner);
  							}
-+							NPCLoader.SendExtraAI(nPC, writer);
++							if (!Core64.vanillaMode)
++								NPCLoader.SendExtraAI(nPC, writer);
  							break;
  						}
  					case 24:
@@ -120,7 +130,7 @@
  									writer.Write(projectile.ai[num12]);
  								}
  							}
-+							if (bb14[Projectile.maxAI + 1])
++							if (!Core64.vanillaMode && bb14[Projectile.maxAI + 1])
 +							{
 +								writer.Write((byte)extraAI.Length);
 +								writer.Write(extraAI);
@@ -140,11 +150,12 @@
  						writer.Write(number3);
  						writer.Write((byte)(number4 + 1f));
  						writer.Write((byte)number5);
-@@ -628,6 +_,7 @@
+@@ -628,6 +_,8 @@
  							writer.Write((short)item3.stack);
  							writer.Write(item3.prefix);
  							writer.Write(value3);
-+							ItemIO.SendModData(item3, writer);
++							if(!Core64.vanillaMode)
++								ItemIO.SendModData(item3, writer);
  							break;
  						}
  					case 33:
@@ -159,13 +170,14 @@
  						}
  						break;
  					case 35:
-@@ -693,6 +_,10 @@
+@@ -693,6 +_,11 @@
  							writer.Write(player4.zone2);
  							writer.Write(player4.zone3);
  							writer.Write(player4.zone4);
 +							if (!ModNet.AllowVanillaClients)
 +							{
-+								PlayerHooks.SendCustomBiomes(player4, writer);
++								if (!Core64.vanillaMode)
++									PlayerHooks.SendCustomBiomes(player4, writer);
 +							}
  							break;
  						}

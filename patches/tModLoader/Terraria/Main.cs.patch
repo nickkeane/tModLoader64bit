@@ -4181,8 +4181,23 @@
  #endif
  		}
  
-@@ -43092,7 +_,7 @@
- 				if (this.selectedMenu >= 1)
+@@ -43055,6 +_,10 @@
+ 				array[0] = true;
+ 				array9[0] = string.Format("   {0}  {1,-10}", Language.GetTextValue("UI.LoadingCode"), Program.LoadedPercentage.ToString("P0"));
+ 				num5 = 1;
++				if (Terraria.ModLoader.x64bit.Core.Core64.vanillaMode) {
++					Main.SavePath = ReLogic.OS.Platform.Current.GetStoragePath();
++					Terraria.ModLoader.x64bit.Core.Core64.LoadVanillaPath();
++				}
+ 			}
+ 			else if (Main.menuMode == 1212)
+ 			{
+@@ -43089,10 +_,10 @@
+ 					array7[k] = 0.75f;
+ 				}
+ 				array7[0] = 1f;
+-				if (this.selectedMenu >= 1)
++				if (this.selectedMenu >= 1 && !Terraria.ModLoader.x64bit.Core.Core64.vanillaMode)
  				{
  					LanguageManager.Instance.SetLanguage(this.selectedMenu);
 -					Main.menuMode = 0;
@@ -4469,37 +4484,15 @@
  				Main.spriteBatch.DrawString(Main.fontMouseText, text6, new Vector2((float)Main.screenWidth - origin2.X + (float)num107 - 10f, (float)Main.screenHeight - origin2.Y + (float)num108 - 2f), color11, 0f, origin2, 1f, SpriteEffects.None, 0f);
  			}
  			for (int num109 = 0; num109 < 5; num109++)
-@@ -46498,10 +_,31 @@
+@@ -46498,10 +_,7 @@
  				{
  					num111 = 2;
  				}
 -				Vector2 origin3 = Main.fontMouseText.MeasureString(Main.versionNumber);
-+				string supportMessage = Language.GetTextValue("tModLoader.PatreonSupport");
-+				string patreonShortURL = @"patreon.com/tModLoader";
-+				bool showPatreon = Main.menuMode == 0;
-+				string architecture = $"(Running in {((Environment.Is64BitProcess) ? 64.ToString() : 32.ToString())} bit mode)";
-+				string GoG = GoGVerifier.IsGoG ? "GoG" : "Steam";
-+				string drawVersion = Main.versionNumber + Environment.NewLine + ModLoader.ModLoader.versionedName + $" - {architecture} {GoG} {PlatformUtilities.RunningPlatform()}" + (showPatreon ? Environment.NewLine + supportMessage : "");
-+				Vector2 origin3 = Main.fontMouseText.MeasureString(drawVersion);
- 				origin3.X *= 0.5f;
- 				origin3.Y *= 0.5f;
+-				origin3.X *= 0.5f;
+-				origin3.Y *= 0.5f;
 -				Main.spriteBatch.DrawString(Main.fontMouseText, Main.versionNumber, new Vector2(origin3.X + (float)num110 + 10f, (float)Main.screenHeight - origin3.Y + (float)num111 - 2f), color12, 0f, origin3, 1f, SpriteEffects.None, 0f);
-+				Main.spriteBatch.DrawString(Main.fontMouseText, drawVersion, new Vector2(origin3.X + (float)num110 + 10f, (float)Main.screenHeight - origin3.Y + (float)num111 - 2f), color12, 0f, origin3, 1f, SpriteEffects.None, 0f);
-+				if (num109 == 4)
-+				{
-+					color12 = new Microsoft.Xna.Framework.Color(127, 191, 191, 76);
-+				}
-+				if (showPatreon)
-+				{
-+					origin3 = Main.fontMouseText.MeasureString(supportMessage);
-+					Vector2 urlSize = Main.fontMouseText.MeasureString(patreonShortURL);
-+					Main.spriteBatch.DrawString(Main.fontMouseText, patreonShortURL, new Vector2(origin3.X + (float)num110 + 10f, (float)Main.screenHeight - origin3.Y + (float)num111 - 2f), color12, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
-+					if (num109 == 4 && Main.mouseLeftRelease && Main.mouseLeft && new Microsoft.Xna.Framework.Rectangle((int)origin3.X + 10, Main.screenHeight - (int)urlSize.Y - 2, (int)urlSize.X, (int)origin3.Y).Contains(new Microsoft.Xna.Framework.Point(Main.mouseX, Main.mouseY)) && hasFocus)
-+					{
-+						Main.PlaySound(SoundID.MenuOpen);
-+						Process.Start("https://www.patreon.com/tModLoader");
-+					}
-+				}
++				Terraria.ModLoader.x64bit.Core.Core64.DrawPatreon(Main.spriteBatch, num109, num110, num111, hasFocus, color12);
  			}
  			Vector2 bonus = Main.DrawThickCursor(false);
  			Main.DrawCursor(bonus, false);

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 using Terraria.ModLoader.Default.Developer;
 using Terraria.ModLoader.Default.Patreon;
+using Terraria.ModLoader.x64bit.Core;
 
 namespace Terraria.ModLoader.Default
 {
@@ -28,6 +29,8 @@ namespace Terraria.ModLoader.Default
 		}
 
 		public override void Load() {
+			if (Core64.vanillaMode)
+				return;
 			Instance = this;
 			if (!Main.dedServ) {
 				AddTexture("MysteryItem", ReadTexture("MysteryItem"));
@@ -53,6 +56,8 @@ namespace Terraria.ModLoader.Default
 		}
 
 		public override void Unload() {
+			if (Core64.vanillaMode)
+				return;
 			PatronSets = null;
 			DeveloperSets = null;
 		}

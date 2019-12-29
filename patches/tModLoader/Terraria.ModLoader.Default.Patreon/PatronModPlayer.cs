@@ -2,12 +2,16 @@ using Microsoft.Xna.Framework;
 using System.Collections.Generic;
 using System.Linq;
 using Terraria.ID;
+using Terraria.ModLoader.x64bit.Core;
 
 namespace Terraria.ModLoader.Default.Patreon
 {
 	internal class PatronModPlayer : ModPlayer
 	{
 		public override bool CloneNewInstances => true;
+
+		public override bool Autoload(ref string name) 
+			=> Core64.vanillaMode;
 
 		public static PatronModPlayer Player(Player player)
 			=> player.GetModPlayer<PatronModPlayer>();

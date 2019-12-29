@@ -1,10 +1,11 @@
 --- src/Terraria\Terraria.DataStructures\TileEntity.cs
 +++ src/tModLoader\Terraria.DataStructures\TileEntity.cs
-@@ -2,6 +_,7 @@
+@@ -2,6 +_,8 @@
  using System.Collections.Generic;
  using System.IO;
  using Terraria.GameContent.Tile_Entities;
 +using Terraria.ModLoader;
++using Terraria.ModLoader.x64bit.Core;
  
  namespace Terraria.DataStructures
  {
@@ -16,12 +17,13 @@
  		}
  
  		public static void PlaceEntityNet(int x, int y, int type)
-@@ -95,6 +_,9 @@
+@@ -95,6 +_,10 @@
  				case 2:
  					tileEntity = new TELogicSensor();
  					break;
 +				default:
-+					tileEntity = ModTileEntity.ConstructFromType(b);
++					if(!Core64.vanillaMode)
++						tileEntity = ModTileEntity.ConstructFromType(b);
 +					break;
  			}
  			tileEntity.type = b;

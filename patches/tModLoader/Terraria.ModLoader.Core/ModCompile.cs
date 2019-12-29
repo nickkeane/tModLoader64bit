@@ -140,16 +140,25 @@ namespace Terraria.ModLoader.Core
 
 		private static string referenceAssembliesPath;
 		internal static bool ReferenceAssembliesCheck(out string msg) {
+			
 			msg = Language.GetTextValue("tModLoader.DMReferenceAssembliesSatisfied");
 			if (referenceAssembliesPath != null)
 				return true;
 
-			if (Platform.IsWindows)
-				referenceAssembliesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) + @"\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5";
-			else if (Platform.IsOSX)
-				referenceAssembliesPath = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/4.5-api";
-			else if (Platform.IsLinux)
-				referenceAssembliesPath = "/usr/lib/mono/4.5-api";
+
+			switch (PlatformUtilities.RunningPlatform()) {
+				case PlatformID.Win32NT:
+					referenceAssembliesPath = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFilesX86) + @"\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.5";
+					break;
+				case PlatformID.MacOSX:
+					referenceAssembliesPath = "/Library/Frameworks/Mono.framework/Versions/Current/lib/mono/4.5-api";
+					break;
+				default:
+					referenceAssembliesPath = "/usr/lib/mono/4.5-api";
+					break;
+			}
+
+			Logging.tML.Info(referenceAssembliesPath);
 
 			if (Directory.Exists(referenceAssembliesPath))
 				return true;

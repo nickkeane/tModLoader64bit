@@ -1,10 +1,14 @@
 ﻿using System.Collections.Generic;
+using Terraria.ModLoader.x64bit.Core;
 
 namespace Terraria.ModLoader.Default.Developer
 {
 	internal class DeveloperPlayer : ModPlayer
 	{
 		public override bool CloneNewInstances => true;
+
+		public override bool Autoload(ref string name) 
+			=> Core64.vanillaMode;
 
 		public static DeveloperPlayer GetPlayer(Player player)
 			=> player.GetModPlayer<DeveloperPlayer>();

@@ -6,9 +6,9 @@ using Terraria.ID;
 using Terraria.Localization;
 using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.Core;
-using Terraria.ModLoader.UI;
 using Terraria.ModLoader.UI.DownloadManager;
 using Terraria.ModLoader.UI.ModBrowser;
+using Terraria.ModLoader.x64bit.Core;
 
 namespace Terraria.ModLoader.UI
 {
@@ -39,9 +39,10 @@ namespace Terraria.ModLoader.UI
 		internal const int modConfigID = 10024;
 		internal const int createModID = 10025;
 		internal const int exitID = 10026;
+		internal const int supportID = 20000;
 		internal static UIMods modsMenu = new UIMods();
 		internal static UILoadMods loadMods = new UILoadMods();
-		private static UIModSources modSources = new UIModSources();
+		private static readonly UIModSources modSources = new UIModSources();
 		internal static UIBuildMod buildMod = new UIBuildMod();
 		internal static UIErrorMessage errorMessage = new UIErrorMessage();
 		internal static UIModBrowser modBrowser = new UIModBrowser();
@@ -63,27 +64,38 @@ namespace Terraria.ModLoader.UI
 		//add to Terraria.Main.DrawMenu in Main.menuMode == 0 after achievements
 		//Interface.AddMenuButtons(this, this.selectedMenu, array9, array7, ref num, ref num3, ref num10, ref num5);
 		internal static void AddMenuButtons(Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, ref int offY, ref int spacing, ref int buttonIndex, ref int numButtons) {
-			buttonNames[buttonIndex] = Language.GetTextValue("tModLoader.MenuMods");
-			if (selectedMenu == buttonIndex) {
-				Main.PlaySound(10, -1, -1, 1);
-				Main.menuMode = modsMenuID;
-			}
-			buttonIndex++;
-			numButtons++;
-			if (ModCompile.DeveloperMode) {
-				buttonNames[buttonIndex] = Language.GetTextValue("tModLoader.MenuModSources");
+			if (!Core64.vanillaMode) {
+				buttonNames[buttonIndex] = Language.GetTextValue("tModLoader.MenuMods");
 				if (selectedMenu == buttonIndex) {
 					Main.PlaySound(10, -1, -1, 1);
-					Main.menuMode = ModCompile.DeveloperModeReady(out var _) ? modSourcesID : developerModeHelpID;
+					Main.menuMode = modsMenuID;
 				}
 				buttonIndex++;
 				numButtons++;
+				if (ModCompile.DeveloperMode) {
+					buttonNames[buttonIndex] = Language.GetTextValue("tModLoader.MenuModSources");
+					if (selectedMenu == buttonIndex) {
+						Main.PlaySound(10, -1, -1, 1);
+						Main.menuMode = ModCompile.DeveloperModeReady(out var _) ? modSourcesID : developerModeHelpID;
+					}
+					buttonIndex++;
+					numButtons++;
+				}
+				buttonNames[buttonIndex] = Language.GetTextValue("tModLoader.MenuModBrowser");
+				if (selectedMenu == buttonIndex) {
+					Main.PlaySound(10, -1, -1, 1);
+					Main.menuMode = modBrowserID;
+				}
+				buttonIndex++;
+				numButtons++;
+				
 			}
-			buttonNames[buttonIndex] = Language.GetTextValue("tModLoader.MenuModBrowser");
+			buttonNames[buttonIndex] = "Support";
 			if (selectedMenu == buttonIndex) {
 				Main.PlaySound(10, -1, -1, 1);
-				Main.menuMode = modBrowserID;
+				Main.menuMode = supportID;
 			}
+
 			buttonIndex++;
 			numButtons++;
 			offY = 220;
@@ -119,6 +131,52 @@ namespace Terraria.ModLoader.UI
 		//add to end of if else chain of Main.menuMode in Terraria.Main.DrawMenu
 		//Interface.ModLoaderMenus(this, this.selectedMenu, array9, array7, array4, ref num2, ref num4, ref num5, ref flag5);
 		internal static void ModLoaderMenus(Main main, int selectedMenu, string[] buttonNames, float[] buttonScales, int[] buttonVerticalSpacing, ref int offY, ref int spacing, ref int numButtons, ref bool backButtonDown) {
+
+			if (Core64.vanillaMode) {
+				if (Main.menuMode == supportID) {
+					offY = 210;
+					spacing = 60;
+					numButtons = 5;
+					buttonVerticalSpacing[numButtons - 1] = 18;
+					int buttonIndex = 0;
+					buttonNames[buttonIndex] = "tModLoader 64bit discord";
+					if (selectedMenu == buttonIndex) {
+						Main.PlaySound(SoundID.MenuOpen);
+						Process.Start("https://discord.gg/DY8cx5T");
+					}
+
+					buttonIndex++;
+					buttonNames[buttonIndex] = "Official tModLoader discord";
+					if (selectedMenu == buttonIndex) {
+						Main.PlaySound(SoundID.MenuOpen);
+						Process.Start("https://discord.gg/RMZCqq6");
+					}
+
+					buttonIndex++;
+					buttonNames[buttonIndex] = "Support Dradon on Patreon!";
+					if (selectedMenu == buttonIndex) {
+						Main.PlaySound(SoundID.MenuOpen);
+						Process.Start("https://www.patreon.com/dradonhunter11");
+					}
+
+					buttonIndex++;
+					buttonNames[buttonIndex] = "Support tModLoader on Patreon!";
+					if (selectedMenu == buttonIndex) {
+						Main.PlaySound(SoundID.MenuOpen);
+						Process.Start("https://www.patreon.com/tModLoader");
+					}
+
+					buttonIndex++;
+					buttonNames[buttonIndex] = Lang.menu[5].Value;
+					if (selectedMenu == buttonIndex || backButtonDown) {
+						backButtonDown = false;
+						Main.menuMode = 0;
+						Main.PlaySound(11, -1, -1, 1);
+					}
+				}
+				return;
+			}
+
 			if (Main.menuMode == loadModsID) {
 				if (ModLoader.ShowFirstLaunchWelcomeMessage) {
 					ModLoader.ShowFirstLaunchWelcomeMessage = false;
@@ -130,6 +188,9 @@ namespace Terraria.ModLoader.UI
 				//	infoMessage.Show(Language.GetTextValue("tModLoader.WhatsNewMessage"), Main.menuMode);
 				//}
 			}
+
+			
+
 			if (Main.menuMode == modsMenuID) {
 				Main.MenuUI.SetState(modsMenu);
 				Main.menuMode = 888;
@@ -146,7 +207,7 @@ namespace Terraria.ModLoader.UI
 				Main.MenuUI.SetState(developerModeHelp);
 				Main.menuMode = 888;
 			}
-			else if (Main.menuMode == loadModsID) {
+			else if (Main.menuMode == loadModsID && !Core64.vanillaMode) {
 				Main.menuMode = 888;
 				Main.MenuUI.SetState(loadMods);
 			}
@@ -201,7 +262,7 @@ namespace Terraria.ModLoader.UI
 				Main.MenuUI.SetState(extractMod);
 				Main.menuMode = 888;
 			}
-			else if(Main.menuMode == progressID) {
+			else if (Main.menuMode == progressID) {
 				Main.MenuUI.SetState(progress);
 				Main.menuMode = 888;
 			}
@@ -275,13 +336,53 @@ namespace Terraria.ModLoader.UI
 					Main.PlaySound(11, -1, -1, 1);
 				}
 			}
-			else if (Main.menuMode == modConfigID)
-			{
+			else if (Main.menuMode == modConfigID) {
 				Main.MenuUI.SetState(modConfig);
 				Main.menuMode = 888;
 			}
 			else if (Main.menuMode == exitID) {
 				Environment.Exit(0);
+			}
+			else if (Main.menuMode == supportID) {
+				offY = 210;
+				spacing = 60;
+				numButtons = 5;
+				buttonVerticalSpacing[numButtons - 1] = 18;
+				int buttonIndex = 0;
+				buttonNames[buttonIndex] = "tModLoader 64bit discord";
+				if (selectedMenu == buttonIndex) {
+					Main.PlaySound(SoundID.MenuOpen);
+					Process.Start("https://discord.gg/DY8cx5T");
+				}
+
+				buttonIndex++;
+				buttonNames[buttonIndex] = "Official tModLoader discord";
+				if (selectedMenu == buttonIndex) {
+					Main.PlaySound(SoundID.MenuOpen);
+					Process.Start("https://discord.gg/RMZCqq6");
+				}
+
+				buttonIndex++;
+				buttonNames[buttonIndex] = "Support Dradon on Patreon!";
+				if (selectedMenu == buttonIndex) {
+					Main.PlaySound(SoundID.MenuOpen);
+					Process.Start("https://www.patreon.com/dradonhunter11");
+				}
+
+				buttonIndex++;
+				buttonNames[buttonIndex] = "Support tModLoader on Patreon!";
+				if (selectedMenu == buttonIndex) {
+					Main.PlaySound(SoundID.MenuOpen);
+					Process.Start("https://www.patreon.com/tModLoader");
+				}
+
+				buttonIndex++;
+				buttonNames[buttonIndex] = Lang.menu[5].Value;
+				if (selectedMenu == buttonIndex || backButtonDown) {
+					backButtonDown = false;
+					Main.menuMode = 0;
+					Main.PlaySound(11, -1, -1, 1);
+				}
 			}
 		}
 
@@ -363,8 +464,9 @@ namespace Terraria.ModLoader.UI
 								File.Copy(tempFile, ModLoader.ModPath + Path.DirectorySeparatorChar + downloadURL.Substring(downloadURL.LastIndexOf("/")), true);
 								File.Delete(tempFile);
 							}
-							while (Console.KeyAvailable)
+							while (Console.KeyAvailable) {
 								Console.ReadKey(true);
+							}
 						}
 					}
 					catch (Exception e) {

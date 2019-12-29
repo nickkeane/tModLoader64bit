@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Terraria.Localization;
+using Terraria.ModLoader.UI;
 
 namespace Terraria.ModLoader.UI.DownloadManager
 {

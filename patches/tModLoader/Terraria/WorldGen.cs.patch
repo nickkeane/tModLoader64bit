@@ -188,11 +188,12 @@
  			WorldGen.worldCleared = true;
  		}
  
-@@ -4566,17 +_,18 @@
+@@ -4566,17 +_,19 @@
  
  		public static void generateWorld(int seed, GenerationProgress customProgressObject = null)
  		{
 +			Logging.Terraria.InfoFormat("Generating World: {0}", Main.ActiveWorldFileData.Name);
++			Logging.Terraria.InfoFormat("World seed : {0}", Main.ActiveWorldFileData.Name);
  			WorldGen._lastSeed = seed;
  			WorldGen._generator = new WorldGenerator(seed);
  			Main.rand = new UnifiedRandom(seed);

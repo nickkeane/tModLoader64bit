@@ -17,6 +17,7 @@ using Terraria.ModLoader.Core;
 using Terraria.ModLoader.Default;
 using Terraria.ModLoader.Engine;
 using Terraria.ModLoader.UI;
+using Terraria.ModLoader.x64bit.Core;
 
 namespace Terraria.ModLoader
 {
@@ -114,6 +115,7 @@ namespace Terraria.ModLoader
 
 		private static bool isLoading = false;
 		private static void Load(CancellationToken token = default) {
+
 			try {
 				if (isLoading)
 					throw new Exception("Load called twice");
@@ -317,6 +319,7 @@ namespace Terraria.ModLoader
 			Main.Configuration.Put("AvoidGithub", UI.ModBrowser.UIModBrowser.AvoidGithub);
 			Main.Configuration.Put("AvoidImgur", UI.ModBrowser.UIModBrowser.AvoidImgur);
 			Main.Configuration.Put("LastLaunchedTModLoaderVersion", version.ToString());
+			Main.Configuration.Put("VanillaMode", Core64.vanillaMode);
 		}
 
 		internal static void LoadConfiguration() {
@@ -331,6 +334,7 @@ namespace Terraria.ModLoader
 			Main.Configuration.Get("ShowMemoryEstimates", ref showMemoryEstimates);
 			Main.Configuration.Get("AvoidGithub", ref UI.ModBrowser.UIModBrowser.AvoidGithub);
 			Main.Configuration.Get("AvoidImgur", ref UI.ModBrowser.UIModBrowser.AvoidImgur);
+			Main.Configuration.Get("VanillaMode", ref Core64.vanillaMode);
 		}
 
 		internal static void MigrateSettings() {

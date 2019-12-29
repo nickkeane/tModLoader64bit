@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Terraria.Localization;
+using Terraria.ModLoader.x64bit.Core;
 
 namespace Terraria.ModLoader.Default.Patreon
 {
@@ -11,6 +12,9 @@ namespace Terraria.ModLoader.Default.Patreon
 		public abstract string SetName { get; }
 		public abstract EquipType ItemEquipType { get; }
 		public virtual string SetSuffix => "'s";
+
+		public override bool Autoload(ref string name) 
+			=> !Core64.vanillaMode;
 
 		protected string EquipTypeSuffix
 			=> Enum.GetName(typeof(EquipType), ItemEquipType);

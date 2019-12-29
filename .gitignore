@@ -23,5 +23,8 @@ solutions/**/*.tar.gz
 /test/Test Local/Mods
 /test/Test Local/Mod Configs
 /ExampleMod/Fonts/ExampleFont.xnb
+/patches/tModLoader/Terraria.csproj.patch
+/patches/Terraria/Terraria.csproj.patch
+/patches/merged/Terraria.csproj.patch
 
 tModLoader\.zip

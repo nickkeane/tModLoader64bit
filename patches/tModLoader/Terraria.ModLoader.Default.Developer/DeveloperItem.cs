@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
+using Terraria.ModLoader.x64bit.Core;
 
 namespace Terraria.ModLoader.Default.Developer
 {
@@ -15,6 +16,9 @@ namespace Terraria.ModLoader.Default.Developer
 			=> Enum.GetName(typeof(EquipType), ItemEquipType);
 
 		public override string Texture => $"ModLoader/Developer.{SetName}_{EquipTypeSuffix}";
+
+		public override bool Autoload(ref string name) 
+			=> Core64.vanillaMode;
 
 		public override void SetStaticDefaults() {
 			string displayName =
