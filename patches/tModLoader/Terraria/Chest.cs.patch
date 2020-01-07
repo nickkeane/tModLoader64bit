@@ -1,10 +1,11 @@
 --- src/Terraria\Terraria\Chest.cs
 +++ src/tModLoader\Terraria\Chest.cs
-@@ -5,6 +_,7 @@
+@@ -5,6 +_,8 @@
  using Terraria.GameContent.Events;
  using Terraria.ID;
  using Terraria.ObjectData;
 +using Terraria.ModLoader;
++using Terraria.ModLoader.x64bit.Core;
  
  namespace Terraria
  {
@@ -17,6 +18,15 @@
  			return Main.tile[x, y] == null || ((Main.tile[x, y].frameX >= 72 && Main.tile[x, y].frameX <= 106) || (Main.tile[x, y].frameX >= 144 && Main.tile[x, y].frameX <= 178) || (Main.tile[x, y].frameX >= 828 && Main.tile[x, y].frameX <= 1006) || (Main.tile[x, y].frameX >= 1296 && Main.tile[x, y].frameX <= 1330) || (Main.tile[x, y].frameX >= 1368 && Main.tile[x, y].frameX <= 1402) || (Main.tile[x, y].frameX >= 1440 && Main.tile[x, y].frameX <= 1474));
  		}
  
+@@ -182,7 +_,7 @@
+ 			{
+ 				return item;
+ 			}
+-			for (int i = 0; i < 1000; i++)
++			for (int i = 0; i < Core64.maxChest; i++)
+ 			{
+ 				bool flag = false;
+ 				bool flag2 = false;
 @@ -253,6 +_,17 @@
  			int num2 = num;
  			short num3;
@@ -35,6 +45,33 @@
  			switch (num2)
  			{
  				case 2:
+@@ -339,7 +_,7 @@
+ 
+ 		public static int FindChest(int X, int Y)
+ 		{
+-			for (int i = 0; i < 1000; i++)
++			for (int i = 0; i < Core64.maxChest; i++)
+ 			{
+ 				if (Main.chest[i] != null && Main.chest[i].x == X && Main.chest[i].y == Y)
+ 				{
+@@ -351,7 +_,7 @@
+ 
+ 		public static int FindChestByGuessing(int X, int Y)
+ 		{
+-			for (int i = 0; i < 1000; i++)
++			for (int i = 0; i < Core64.maxChest; i++)
+ 			{
+ 				if (Main.chest[i] != null && Main.chest[i].x >= X && Main.chest[i].x < X + 2 && Main.chest[i].y >= Y && Main.chest[i].y < Y + 2)
+ 				{
+@@ -364,7 +_,7 @@
+ 		public static int FindEmptyChest(int x, int y, int type = 21, int style = 0, int direction = 1)
+ 		{
+ 			int num = -1;
+-			for (int i = 0; i < 1000; i++)
++			for (int i = 0; i < Core64.maxChest; i++)
+ 			{
+ 				Chest chest = Main.chest[i];
+ 				if (chest != null)
 @@ -418,17 +_,25 @@
  				}
  				Main.chest[num] = chest;
@@ -64,6 +101,24 @@
  			}
  			return num;
  		}
+@@ -460,7 +_,7 @@
+ 
+ 		public static bool CanDestroyChest(int X, int Y)
+ 		{
+-			for (int i = 0; i < 1000; i++)
++			for (int i = 0; i < Core64.maxChest; i++)
+ 			{
+ 				Chest chest = Main.chest[i];
+ 				if (chest != null && chest.x == X && chest.y == Y)
+@@ -480,7 +_,7 @@
+ 
+ 		public static bool DestroyChest(int X, int Y)
+ 		{
+-			for (int i = 0; i < 1000; i++)
++			for (int i = 0; i < Core64.maxChest; i++)
+ 			{
+ 				Chest chest = Main.chest[i];
+ 				if (chest != null && chest.x == X && chest.y == Y)
 @@ -531,12 +_,12 @@
  			}
  		}
@@ -118,4 +173,19 @@
  			if (Main.player[Main.myPlayer].discount)
  			{
  				for (int num7 = 0; num7 < num; num7++)
+@@ -2243,12 +_,12 @@
+ 			bool[] array = new bool[1000];
+ 			for (int i = 0; i < 255; i++)
+ 			{
+-				if (Main.player[i].active && Main.player[i].chest >= 0 && Main.player[i].chest < 1000)
++				if (Main.player[i].active && Main.player[i].chest >= 0 && Main.player[i].chest < Core64.maxChest)
+ 				{
+ 					array[Main.player[i].chest] = true;
+ 				}
+ 			}
+-			for (int j = 0; j < 1000; j++)
++			for (int j = 0; j < Core64.maxChest; j++)
+ 			{
+ 				Chest chest = Main.chest[j];
+ 				if (chest != null)
 

@@ -1,5 +1,14 @@
 --- src/Terraria\Terraria.GameContent.Generation\TrackGenerator.cs
 +++ src/tModLoader\Terraria.GameContent.Generation\TrackGenerator.cs
+@@ -49,7 +_,7 @@
+ 			87,
+ 			86
+ 		};
+-		private TrackGenerator.TrackHistory[] _historyCache = new TrackGenerator.TrackHistory[2048];
++		private TrackGenerator.TrackHistory[] _historyCache = new TrackGenerator.TrackHistory[2048 * 2];
+ 
+ 		public void Generate(int trackCount, int minimumLength)
+ 		{
 @@ -94,7 +_,7 @@
  			{
  				return false;
@@ -9,4 +18,14 @@
  			for (int i = 0; i < TrackGenerator.INVALID_WALLS.Length; i++)
  			{
  				if (wall == TrackGenerator.INVALID_WALLS[i])
+@@ -217,7 +_,8 @@
+ 						flag2 = false;
+ 					}
+ 					num6 -= num11;
+-					if (num6 < 0)
++					Console.Write(num6);
++					if (num6 <= 0)
+ 					{
+ 						flag = false;
+ 					}
 

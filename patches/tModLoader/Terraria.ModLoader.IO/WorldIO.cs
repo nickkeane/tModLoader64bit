@@ -5,6 +5,7 @@ using System.IO;
 using Terraria.ID;
 using Terraria.ModLoader.Default;
 using Terraria.ModLoader.Exceptions;
+using Terraria.ModLoader.x64bit.Core;
 using Terraria.Social;
 using Terraria.Utilities;
 
@@ -76,7 +77,7 @@ namespace Terraria.ModLoader.IO
 
 		internal static List<TagCompound> SaveChests() {
 			var list = new List<TagCompound>();
-			for (int k = 0; k < 1000; k++) {
+			for (int k = 0; k < Core64.maxChest; k++) {
 				var chest = Main.chest[k];
 				if (chest == null)
 					continue;
@@ -165,7 +166,7 @@ namespace Terraria.ModLoader.IO
 					}
 				}
 				else {
-					((MysteryWorld)ModLoader.GetMod("ModLoader").GetModWorld("MysteryWorld")).mysteryNPCs.Add(tag);
+					ModContent.GetInstance<MysteryWorld>().mysteryNPCs.Add(tag);
 				}
 			}
 		}
@@ -193,7 +194,7 @@ namespace Terraria.ModLoader.IO
 					NPC.killCount[type] = tag.GetInt("count");
 				}
 				else {
-					((MysteryWorld)ModLoader.GetMod("ModLoader").GetModWorld("MysteryWorld")).mysteryKillCounts.Add(tag);
+					ModContent.GetInstance<MysteryWorld>().mysteryKillCounts.Add(tag);
 				}
 			}
 		}
@@ -294,7 +295,7 @@ namespace Terraria.ModLoader.IO
 					}
 				}
 				else {
-					((MysteryWorld)ModLoader.GetMod("ModLoader").GetModWorld("MysteryWorld")).data.Add(tag);
+					ModContent.GetInstance<MysteryWorld>().data.Add(tag);
 				}
 			}
 		}
@@ -448,7 +449,7 @@ namespace Terraria.ModLoader.IO
 						["name"] = name,
 						["legacyData"] = data
 					};
-					((MysteryWorld)ModLoader.GetMod("ModLoader").GetModWorld("MysteryWorld")).data.Add(tag);
+					ModContent.GetInstance<MysteryWorld>().data.Add(tag);
 				}
 			}
 		}

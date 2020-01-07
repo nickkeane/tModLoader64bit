@@ -3,6 +3,8 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using log4net;
+using Terraria.ModLoader.Core;
 using Terraria.ModLoader.Default.Developer;
 using Terraria.ModLoader.Default.Patreon;
 using Terraria.ModLoader.x64bit.Core;
@@ -71,7 +73,8 @@ namespace Terraria.ModLoader.Default
 				new PatreonItem[] { new Remeus_Head(), new Remeus_Body(), new Remeus_Legs() },
 				new PatreonItem[] { new Saethar_Head(), new Saethar_Body(), new Saethar_Legs(), new Saethar_Wings() },
 				new PatreonItem[] { new Orian_Head(), new Orian_Body(), new Orian_Legs() },
-				new PatreonItem[] { new Glory_Head(), new Glory_Body(), new Glory_Legs() }
+				new PatreonItem[] { new Glory_Head(), new Glory_Body(), new Glory_Legs() },
+				new PatreonItem[] { new POCKETS_Head(), new POCKETS_Body(), new POCKETS_Legs(), new POCKETS_Wings() },
 			};
 
 			foreach (var patronItem in PatronSets.SelectMany(x => x)) {
@@ -114,6 +117,7 @@ namespace Terraria.ModLoader.Default
 
 			// [sanity check, makes it easier to know what's wrong]
 			if (stream == null) {
+				Logging.tML.Error($"File could not be found {file}");
 				throw new ArgumentException("Given EquipType for PatreonItem or name is not valid. It is possible either does not match up with the classname. If you added a new EquipType, modify GetEquipTypeSuffix() and AddPatreonItemAndEquipType() first.");
 			}
 

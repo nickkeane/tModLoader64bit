@@ -25,7 +25,15 @@ namespace Terraria.ModLoader.x64bit.Core
 
 		internal static readonly string vanillaVersion = "Terraria" + 194;
 
-		internal static bool betaMode = false;
+		internal static bool betaMode = true;
+
+		internal const int vanillaChestLimit = 1000;
+		internal const int maxChest = 2000;
+
+		internal static void SetupVariable() {
+			Main.chest = new Chest[maxChest];
+			Main.tile = new Tile[16801,3601];
+		}
 
 		internal static void LoadVanillaPath() {
 			
@@ -38,12 +46,8 @@ namespace Terraria.ModLoader.x64bit.Core
 			Main.PlayerPath = Path.Combine(Main.SavePath, "ModLoader" ,"Players");
 		}
 
-		internal static void DrawPatreon(SpriteBatch sb, int num109, int num110, int num111, bool hasFocus, Color color12) {
-			if (!betaMode) return;
-			if (Main.menuMode == 10002 && vanillaMode) {
-				Main.menuMode = 0;
-			}
-
+		internal static void DrawPatreon(SpriteBatch sb, int num109, int num110, int num111, bool hasFocus, Color color12) 
+		{
 			string patreonShortURL = ((!vanillaMode) ? "Switch to vanilla mode" : "Switch to TML");
 			bool showPatreon = Main.menuMode == 0;
 			string architecture = $"(Running in {((Environment.Is64BitProcess) ? 64.ToString() : 32.ToString())} bit mode)";
@@ -61,16 +65,26 @@ namespace Terraria.ModLoader.x64bit.Core
 			if (num109 == 4) {
 				color12 = new Microsoft.Xna.Framework.Color(127, 191, 191, 76);
 			}
+
+			if (!betaMode) return;
+
+			if (Main.menuMode == 10002 && vanillaMode) {
+				Main.menuMode = 0;
+			}
+
 			if (showPatreon) {
 				Vector2 urlSize = Main.fontMouseText.MeasureString(patreonShortURL);
-				Main.spriteBatch.DrawString(Main.fontMouseText, patreonShortURL, new Vector2((float)num110 + 10f, (float)Main.screenHeight - origin3.Y - 42f - (float)num111 + 2f), color12, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
-				if (num109 == 4 && Main.mouseLeftRelease && Main.mouseLeft && new Microsoft.Xna.Framework.Rectangle((int) (num110 + 10f), (int) (Main.screenHeight - origin3.Y - 34f - num111 + 2f), (int)urlSize.X, (int)origin3.Y).Contains(new Microsoft.Xna.Framework.Point(Main.mouseX, Main.mouseY)) && hasFocus) {
+				Main.spriteBatch.DrawString(Main.fontMouseText, patreonShortURL, new Vector2((float)num110 + 10f, (float)Main.screenHeight - origin3.Y - 46f - (float)num111 + 2f), color12, 0f, Vector2.Zero, 1f, SpriteEffects.None, 0f);
+				if (num109 == 4 && Main.mouseLeftRelease && Main.mouseLeft && new Microsoft.Xna.Framework.Rectangle((int) (num110 + 10f), (int) (Main.screenHeight - origin3.Y - 46f - num111 + 2f), (int)urlSize.X, (int)origin3.Y).Contains(new Microsoft.Xna.Framework.Point(Main.mouseX, Main.mouseY)) && hasFocus) {
 					Main.PlaySound(SoundID.MenuOpen);
-					vanillaMode = !vanillaMode;
-					Main.SaveSettings();
-					Interface.infoMessage.Show("You'll need to restart the game so that the necessary change can apply.", 0, null, "Restart", () => Environment.Exit(0));
+					//vanillaMode = !vanillaMode;
+					//Main.SaveSettings();
+					//Interface.infoMessage.Show("You'll need to restart the game so that the necessary change can apply.", 0, null, "Restart", () => Environment.Exit(0));
+					Interface.infoMessage.Show("This feature is note completely done and will be released at a further time.\n\n\n-Dradonhunter11", 0);
 				}
 			}
 		}
+
+		
 	}
 }

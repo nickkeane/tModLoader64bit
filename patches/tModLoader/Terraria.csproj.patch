@@ -183,11 +183,13 @@
      </Reference>
      <Reference Include="WindowsBase" />
    </ItemGroup>
-@@ -215,7 +_,16 @@
+@@ -215,7 +_,18 @@
      <Compile Include="Terraria.GameContent.UI.Elements\UIKeybindingToggleListItem.cs" />
      <Compile Include="Terraria.GameContent.UI.Elements\UIList.cs" />
      <Compile Include="Terraria.GameContent.UI.Elements\UIPanel.cs" />
 -    <Compile Include="Terraria.GameContent.UI.Elements\UIProgressBar.cs" />
++    <Compile Include="Terraria.ModLoader.Default.Patreon\POCKETS.cs" />
++    <Compile Include="Terraria.ModLoader.UI\UIProgressBar.cs" />
 +    <Compile Include="Terraria.ModLoader.x64bit.Core\Core64.cs" />
 +    <Compile Include="Terraria.ModLoader.Config.UI\DefinitionElement.cs" />
 +    <Compile Include="Terraria.ModLoader.Config.UI\NPCDefinitionElement.cs" />
@@ -505,7 +507,7 @@
        <LogicalName>ReLogic.dll</LogicalName>
      </EmbeddedResource>
      <EmbeddedResource Include="..\..\references\Steamworks.NET.Windows.dll" Condition="$(DefineConstants.Contains('WINDOWS'))">
-@@ -529,6 +_,21 @@
+@@ -529,6 +_,20 @@
      <EmbeddedResource Include="..\..\references\Steamworks.NET.Linux.dll" Condition="$(DefineConstants.Contains('LINUX'))">
        <LogicalName>Steamworks.NET.dll</LogicalName>
      </EmbeddedResource>
@@ -523,11 +525,10 @@
 +    <EmbeddedResource Include="..\..\references\Mono.Cecil.Mdb.dll" />
 +    <EmbeddedResource Include="..\..\references\MonoMod.RuntimeDetour.dll" />
 +    <EmbeddedResource Include="..\..\references\MonoMod.Utils.dll" />
-+    <EmbeddedResource Include="..\..\references\System.ValueTuple.dll" />
      <EmbeddedResource Include="Terraria.Localization.Content.de-DE.Game.json" />
      <EmbeddedResource Include="Terraria.Localization.Content.de-DE.Items.json" />
      <EmbeddedResource Include="Terraria.Localization.Content.de-DE.Main.json" />
-@@ -593,4 +_,147 @@
+@@ -593,4 +_,156 @@
      <EmbeddedResource Include="Terraria.Localization.Content.zh-Hans.Projectiles.json" />
      <EmbeddedResource Include="Terraria.Localization.Content.zh-Hans.Town.json" />
    </ItemGroup>
@@ -581,6 +582,15 @@
 +    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\Saethar_Legs_Legs.png" />
 +    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\Saethar_Wings.png" />
 +    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\Saethar_Wings_Wings.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Body.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Body_Arms.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Body_Body.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Head.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Head_Head.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Legs.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Legs_Legs.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Wings.png" />
++    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\POCKETS_Wings_Wings.png" />
 +    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\Orian_Body.png" />
 +    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\Orian_Body_Arms.png" />
 +    <EmbeddedResource Include="Terraria.ModLoader.Default.Patreon\Orian_Body_Body.png" />

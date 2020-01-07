@@ -26,7 +26,7 @@ namespace Terraria.ModLoader
 	/// </summary>
 	public static class ModLoader
 	{
-		public static readonly Version version = new Version(0, 11, 5);
+		public static readonly Version version = new Version(0, 11, 6, 1);
 		// Stores the most recent version of tModLoader launched. Can be used for migration.
 		public static Version LastLaunchedTModLoaderVersion;
 		// public static bool ShowWhatsNew;
@@ -136,15 +136,18 @@ namespace Terraria.ModLoader
 
 				if (OnSuccessfulLoad != null) {
 					OnSuccessfulLoad();
-					OnSuccessfulLoad = null;
 				}
 				else {
 					Main.menuMode = 0;
 				}
 			}
 			catch when (token.IsCancellationRequested) {
-				if (Unload())
-					Main.menuMode = Interface.modsMenuID;
+				// cancel needs to reload with ModLoaderMod and all others skipped
+				skipLoad = true;
+				OnSuccessfulLoad += () => Main.menuMode = Interface.modsMenuID;
+
+				isLoading = false;
+				Load(); // don't provide a token, loading just ModLoaderMod should be quick
 			}
 			catch (Exception e) {
 				var responsibleMods = new List<string>();
@@ -176,10 +179,13 @@ namespace Terraria.ModLoader
 				foreach (var mod in responsibleMods)
 					DisableMod(mod);
 
+				isLoading = false; // disable loading flag, because server will just instantly retry reload
 				DisplayLoadError(msg, e, e.Data.Contains("fatal"), responsibleMods.Count == 0);
 			}
 			finally {
 				isLoading = false;
+				OnSuccessfulLoad = null;
+				skipLoad = false;
 			}
 		}
 
@@ -190,7 +196,7 @@ namespace Terraria.ModLoader
 			var msg = Language.GetTextValue("tModLoader.LoadErrorDotNet45Required");
 #if CLIENT
 			Interface.MessageBoxShow(msg);
-			Process.Start("https://www.microsoft.com/net/download/thank-you/net472");
+			Process.Start("https://dotnet.microsoft.com/download/dotnet-framework");
 #else
 			Console.ForegroundColor = ConsoleColor.Red;
 			Console.WriteLine(msg);
@@ -208,33 +214,11 @@ namespace Terraria.ModLoader
 				Main.menuMode = Interface.loadModsID;
 		}
 
-		internal static List<string> badUnloaders = new List<string>();
 		private static bool Unload() {
-			if (Mods.Length == 0)
-				return true;
-
 			try {
-				Logging.tML.Info("Unloading mods");
-				if (Main.dedServ) {
-					Console.WriteLine("Unloading mods...");
-				} else {
-					Interface.loadMods.SetLoadStage("tModLoader.MSUnloading", Mods.Length);
-				}
-
-				ModContent.UnloadModContent();
-				Mods = new Mod[0];
-				modsByName.Clear();
-				ModContent.Unload();
-			
-				MemoryTracking.Clear();
-				Thread.MemoryBarrier();
-				GC.Collect();
-				badUnloaders.Clear();
-				foreach (var mod in weakModReferences.Where(r => r.IsAlive).Select(r => (Mod)r.Target)) {
-					Logging.tML.WarnFormat("{0} not fully unloaded during unload.", mod.Name);
-					badUnloaders.Add(mod.Name);
-				}
-
+				// have to move unload logic to a separate method so the stack frame is cleared. Otherwise unloading can capture mod instances in local variables, even with memory barriers (thanks compiler weirdness)
+				do_Unload();
+				WarnModsStillLoaded();
 				return true;
 			}
 			catch (Exception e) {
@@ -248,6 +232,32 @@ namespace Terraria.ModLoader
 
 				return false;
 			}
+		}
+
+		private static void do_Unload() {
+			Logging.tML.Info("Unloading mods");
+			if (Main.dedServ) {
+				Console.WriteLine("Unloading mods...");
+			}
+			else {
+				Interface.loadMods.SetLoadStage("tModLoader.MSUnloading", Mods.Length);
+			}
+
+			ModContent.UnloadModContent();
+			Mods = new Mod[0];
+			modsByName.Clear();
+			ModContent.Unload();
+
+			MemoryTracking.Clear();
+			Thread.MemoryBarrier();
+			GC.Collect();
+		}
+
+		internal static List<string> badUnloaders = new List<string>();
+		private static void WarnModsStillLoaded() {
+			badUnloaders = weakModReferences.Where(r => r.IsAlive).Select(r => ((Mod)r.Target).Name).ToList();
+			foreach (var modName in badUnloaders)
+				Logging.tML.WarnFormat("{0} not fully unloaded during unload.", modName);
 		}
 
 		private static void DisplayLoadError(string msg, Exception e, bool fatal, bool continueIsRetry = false) {
@@ -318,6 +328,7 @@ namespace Terraria.ModLoader
 			Main.Configuration.Put("ShowMemoryEstimates", showMemoryEstimates);
 			Main.Configuration.Put("AvoidGithub", UI.ModBrowser.UIModBrowser.AvoidGithub);
 			Main.Configuration.Put("AvoidImgur", UI.ModBrowser.UIModBrowser.AvoidImgur);
+			Main.Configuration.Put(nameof(UI.ModBrowser.UIModBrowser.EarlyAutoUpdate), UI.ModBrowser.UIModBrowser.EarlyAutoUpdate);
 			Main.Configuration.Put("LastLaunchedTModLoaderVersion", version.ToString());
 			Main.Configuration.Put("VanillaMode", Core64.vanillaMode);
 		}
@@ -334,6 +345,7 @@ namespace Terraria.ModLoader
 			Main.Configuration.Get("ShowMemoryEstimates", ref showMemoryEstimates);
 			Main.Configuration.Get("AvoidGithub", ref UI.ModBrowser.UIModBrowser.AvoidGithub);
 			Main.Configuration.Get("AvoidImgur", ref UI.ModBrowser.UIModBrowser.AvoidImgur);
+			Main.Configuration.Get(nameof(UI.ModBrowser.UIModBrowser.EarlyAutoUpdate), ref UI.ModBrowser.UIModBrowser.EarlyAutoUpdate);
 			Main.Configuration.Get("VanillaMode", ref Core64.vanillaMode);
 		}
 

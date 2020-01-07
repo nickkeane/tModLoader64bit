@@ -1,6 +1,6 @@
 --- src/Terraria\Terraria\Program.cs
 +++ src/tModLoader\Terraria\Program.cs
-@@ -12,12 +_,13 @@
+@@ -12,12 +_,14 @@
  using System.Runtime.ExceptionServices;
  using System.Text;
  using System.Threading;
@@ -12,6 +12,7 @@
  using Terraria.Localization;
 +using Terraria.ModLoader;
 +using Terraria.ModLoader.Core;
++using Terraria.ModLoader.x64bit.Core;
  using Terraria.Social;
  using Terraria.Utilities;
  
@@ -65,7 +66,7 @@
  					}
  				}
  				Program.ThingsLoaded++;
-@@ -205,20 +_,62 @@
+@@ -205,20 +_,71 @@
  #endif
  			try
  			{
@@ -112,6 +113,15 @@
 +				LaunchParameters.ContainsKey("-tmlsavedirectory") ? LaunchParameters["-tmlsavedirectory"] :
 +				LaunchParameters.ContainsKey("-savedirectory") ? Path.Combine(LaunchParameters["-savedirectory"], "ModLoader") :
 +				Platform.Current.GetStoragePath($"Terraria{Path.DirectorySeparatorChar}ModLoader");
++
++			if (Core64.betaMode) {
++				SavePath =
++					LaunchParameters.ContainsKey("-tmlsavedirectory") ? LaunchParameters["-tmlsavedirectory"] :
++					LaunchParameters.ContainsKey("-savedirectory") ? Path.Combine(LaunchParameters["-savedirectory"], "ModLoaderBeta") :
++					Platform.Current.GetStoragePath($"Terraria{Path.DirectorySeparatorChar}ModLoaderBeta");
++			}
++
++			
 +
 +			try {
 +				Logging.Init();

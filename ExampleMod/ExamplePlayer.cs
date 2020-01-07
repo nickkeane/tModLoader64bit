@@ -449,6 +449,7 @@ namespace ExampleMod
 				}
 				customDamage = true;
 			}
+			if (blockyAccessory) playSound = false;
 			constantDamage = 0;
 			percentDamage = 0f;
 			defenseEffect = -1f;
@@ -456,6 +457,7 @@ namespace ExampleMod
 		}
 
 		public override void Hurt(bool pvp, bool quiet, double damage, int hitDirection, bool crit) {
+			if (blockyAccessory) Main.PlaySound(SoundID.Zombie, player.position, 13);
 			if (elementShield && damage > 1.0) {
 				if (elementShields < 6) {
 					int k;
@@ -494,6 +496,12 @@ namespace ExampleMod
 							}
 						}
 					}
+				}
+			}
+			if (player.mount._mountSpecificData is Mounts.Car.CarSpecificData balloons) {
+				if (balloons.count > 0) {
+					balloons.count--;
+					Main.PlaySound(SoundID.Item38, player.position);
 				}
 			}
 		}

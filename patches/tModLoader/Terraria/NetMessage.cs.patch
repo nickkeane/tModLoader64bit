@@ -43,7 +43,7 @@
 -						writer.Write("Terraria" + 193);
 +						if(!Core64.vanillaMode)
 +							writer.Write(ModLoader.ModLoader.versionedName);
-+						else 
++						else
 +							writer.Write(Core64.vanillaVersion);
  						break;
  					case 2:
@@ -95,7 +95,7 @@
 +								ItemIO.SendModData(item2, writer);
 +							}
 +
-+							
++
  							break;
  						}
  					case 22:
@@ -307,6 +307,15 @@
  							if ((b & 16) == 16)
  							{
  								tile.wallColor(reader.ReadByte());
+@@ -2002,7 +_,7 @@
+ 				short x = reader.ReadInt16();
+ 				short y = reader.ReadInt16();
+ 				string name = reader.ReadString();
+-				if (num4 >= 0 && num4 < 1000)
++				if (num4 >= 0 && num4 < Core64.maxChest)
+ 				{
+ 					if (Main.chest[(int)num4] == null)
+ 					{
 @@ -2050,12 +_,13 @@
  					NetMessage.buffer[i].totalData += streamLength;
  					NetMessage.buffer[i].checkBytes = true;

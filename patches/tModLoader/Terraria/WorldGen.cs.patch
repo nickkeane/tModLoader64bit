@@ -1,11 +1,12 @@
 --- src/Terraria\Terraria\WorldGen.cs
 +++ src/tModLoader\Terraria\WorldGen.cs
-@@ -18,6 +_,8 @@
+@@ -18,6 +_,9 @@
  using Terraria.ObjectData;
  using Terraria.Utilities;
  using Terraria.World.Generation;
 +using Terraria.ModLoader;
 +using Terraria.ModLoader.IO;
++using Terraria.ModLoader.x64bit.Core;
  
  #if CLIENT
  using Terraria.Map;
@@ -23,6 +24,24 @@
  		public static int tLeft;
  		public static int tRight;
  		public static int tTop;
+@@ -702,12 +_,12 @@
+ 		private static int[] dRoomT = new int[WorldGen.maxDRooms];
+ 		private static int[] dRoomB = new int[WorldGen.maxDRooms];
+ 		private static int numDDoors;
+-		private static int[] DDoorX = new int[300];
+-		private static int[] DDoorY = new int[300];
+-		private static int[] DDoorPos = new int[300];
++		private static int[] DDoorX = new int[500];
++		private static int[] DDoorY = new int[500];
++		private static int[] DDoorPos = new int[500];
+ 		private static int numDPlats;
+-		private static int[] DPlatX = new int[300];
+-		private static int[] DPlatY = new int[300];
++		private static int[] DPlatX = new int[500];
++		private static int[] DPlatY = new int[500];
+ 		private static int JungleItemCount = 0;
+ 		private static int[] JChestX = new int[100];
+ 		private static int[] JChestY = new int[100];
 @@ -942,7 +_,7 @@
  				return true;
  			}
@@ -180,6 +199,15 @@
  			Main.rand = new UnifiedRandom((int)DateTime.Now.Ticks);
  			WorldFile.loadWorld(Main.ActiveWorldFileData.IsCloudSave);
  			if (WorldGen.loadFailed || !WorldGen.loadSuccess)
+@@ -2754,7 +_,7 @@
+ 			{
+ 				Main.projectile[num6] = new Projectile();
+ 			}
+-			for (int num7 = 0; num7 < 1000; num7++)
++			for (int num7 = 0; num7 < Core64.maxChest; num7++)
+ 			{
+ 				Main.chest[num7] = null;
+ 			}
 @@ -2771,6 +_,7 @@
  				Main.liquidBuffer[num10] = new LiquidBuffer();
  			}
@@ -290,15 +318,17 @@
  					progress.Set(0.4f);
  					if (!WorldGen.crimson)
  					{
-@@ -10524,6 +_,8 @@
+@@ -10524,7 +_,9 @@
  							}
  						}
  					}
+-					TrackGenerator.Run((int)(10f * num), (int)(num * 25f) + 250);
 +					progress.Message = Lang.gen[76] + "..Minecart Tracks";
 +					progress.Set(0.5f);
- 					TrackGenerator.Run((int)(10f * num), (int)(num * 25f) + 250);
++					TrackGenerator.Run((int)(10f * num), Math.Min((int)(num * 25f) + 250, 350));
  					progress.Set(1f);
  				});
+ 			WorldGen.AddGenerationPass("Final Cleanup", delegate(GenerationProgress progress)
 @@ -10575,8 +_,11 @@
  					WorldGen.gen = false;
  					Main.AnglerQuestSwap();
@@ -515,6 +545,15 @@
  									{
  										flag2 = true;
  										break;
+@@ -14984,7 +_,7 @@
+ 
+ 		public static void makeTemple(int x, int y)
+ 		{
+-			Rectangle[] array = new Rectangle[40];
++			Rectangle[] array = new Rectangle[200];
+ 			float num = (float)(Main.maxTilesX / 4200);
+ 			int num2 = WorldGen.genRand.Next((int)(num * 10f), (int)(num * 16f));
+ 			int num3 = 1;
 @@ -20411,11 +_,7 @@
  				Main.tile[i, j] = new Tile();
  			}

@@ -1,11 +1,12 @@
 --- src/Terraria\Terraria.IO\WorldFile.cs
 +++ src/tModLoader\Terraria.IO\WorldFile.cs
-@@ -11,6 +_,8 @@
+@@ -11,6 +_,9 @@
  using Terraria.Localization;
  using Terraria.Social;
  using Terraria.Utilities;
 +using Terraria.ModLoader;
 +using Terraria.ModLoader.IO;
++using Terraria.ModLoader.x64bit.Core;
  
  namespace Terraria.IO
  {
@@ -53,6 +54,15 @@
  			{
  				return 1;
  			}
+@@ -805,7 +_,7 @@
+ 			{
+ 				num7 = 20;
+ 			}
+-			for (int l = 0; l < 1000; l++)
++			for (int l = 0; l < Core64.vanillaChestLimit; l++)
+ 			{
+ 				if (fileIO.ReadBoolean())
+ 				{
 @@ -965,7 +_,7 @@
  		{
  			short num = 470;
@@ -123,6 +133,15 @@
  						num2++;
  						if (tile.wallColor() != 0)
  						{
+@@ -1344,7 +_,7 @@
+ 		private static int SaveChests(BinaryWriter writer)
+ 		{
+ 			short num = 0;
+-			for (int i = 0; i < 1000; i++)
++			for (int i = 0; i < Core64.vanillaChestLimit; i++)
+ 			{
+ 				Chest chest = Main.chest[i];
+ 				if (chest != null)
 @@ -1390,7 +_,7 @@
  					for (int l = 0; l < 40; l++)
  					{

@@ -192,17 +192,17 @@ namespace Terraria.ModLoader
 		public virtual int ChoosePrefix(UnifiedRandom rand) => -1;
 
 		/// <summary>
-		/// To prevent putting the item in the tinkerer slot, return false when pre is -3
-		/// To prevent rolling of a prefix on spawn, return false when pre is -1
-		/// To force rolling of a prefix on spawn, return true when pre is -1
+		/// To prevent putting the item in the tinkerer slot, return false when pre is -3.
+		/// To prevent rolling of a prefix on spawn, return false when pre is -1.
+		/// To force rolling of a prefix on spawn, return true when pre is -1.
 		/// 
-		/// To reduce the probability of a prefix on spawn (pre == -1) to X%, return false 100-4X % of the time
-		/// To increase the probability of a prefix on spawn (pre == -1) to X%, return true (4X-100)/3 % of the time
+		/// To reduce the probability of a prefix on spawn (pre == -1) to X%, return false 100-4X % of the time.
+		/// To increase the probability of a prefix on spawn (pre == -1) to X%, return true (4X-100)/3 % of the time.
 		/// 
 		/// To delete a prefix from an item when the item is loaded, return false when pre is the prefix you want to delete.
-		/// Use AllowPrefix to prevent rolling of a certain prefix
+		/// Use AllowPrefix to prevent rolling of a certain prefix.
 		/// </summary>
-		/// <param name="pre">The prefix being applied to the item, or the roll mode. -1 is when an item is bought from a shop, crafted or generated in a chest. -2 is when the item is rolled in the tinkerer. -3 determines if the item can be placed in the tinkerer slot.</param>
+		/// <param name="pre">The prefix being applied to the item, or the roll mode. -1 is when the item is naturally generated in a chest, crafted, purchased from an NPC, looted from a grab bag (excluding presents), or dropped by a slain enemy (if it's spawned with prefixGiven: -1). -2 is when the item is rolled in the tinkerer. -3 determines if the item can be placed in the tinkerer slot.</param>
 		/// <returns></returns>
 		public virtual bool? PrefixChance(int pre, UnifiedRandom rand) => null;
 
@@ -244,7 +244,7 @@ namespace Terraria.ModLoader
 		/// Allows you to change the effective useTime of this item.
 		/// </summary>
 		/// <param name="player"></param>
-		/// <returns>The multiplier on the usage speed. 1f by default.</returns>
+		/// <returns>The multiplier on the usage speed. 1f by default. Values greater than 1 increase the item speed.</returns>
 		public virtual float UseTimeMultiplier(Player player) {
 			return 1f;
 		}
@@ -253,7 +253,7 @@ namespace Terraria.ModLoader
 		/// Allows you to change the effective useAnimation of this item.
 		/// </summary>
 		/// <param name="player"></param>
-		/// <returns>The multiplier on the animation speed. 1f by default.</returns>
+		/// <returns>The multiplier on the animation speed. 1f by default. Values greater than 1 increase the item speed.</returns>
 		public virtual float MeleeSpeedMultiplier(Player player) {
 			return 1f;
 		}
@@ -801,6 +801,14 @@ namespace Terraria.ModLoader
 		public virtual void Update(ref float gravity, ref float maxFallSpeed) {
 		}
 
+		/// <summary>
+		/// Returns whether or not this item burns when it is thrown into lava despite item.rare not being 0. Returns false by default.
+		/// </summary>
+		public virtual bool CanBurnInLava()
+		{
+			return false;
+		}
+		
 		/// <summary>
 		/// Allows you to make things happen when this item is lying in the world. This will always be called, even when it is being grabbed by a player. This hook should be used for adding light, or for increasing the age of less valuable items.
 		/// </summary>
