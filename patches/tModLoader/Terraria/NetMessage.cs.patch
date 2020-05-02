@@ -12,7 +12,7 @@
  using Terraria.Localization;
 +using Terraria.ModLoader;
 +using Terraria.ModLoader.IO;
-+using Terraria.ModLoader.x64bit.Core;
++using Terraria.ModLoader.x64bit;
  using Terraria.Net;
  using Terraria.Net.Sockets;
  using Terraria.Social;

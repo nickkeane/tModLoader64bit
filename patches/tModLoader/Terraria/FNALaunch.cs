@@ -2,6 +2,7 @@
 using System;
 using System.IO;
 using System.Reflection;
+
 namespace Terraria
 {
 	internal static class FNALaunch

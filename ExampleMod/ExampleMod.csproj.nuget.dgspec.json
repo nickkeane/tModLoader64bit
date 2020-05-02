@@ -1,0 +1,46 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\TerrariaFullsource\\Official merge\\tModLoader\\ExampleMod\\ExampleMod.csproj": {}
+  },
+  "projects": {
+    "D:\\TerrariaFullsource\\Official merge\\tModLoader\\ExampleMod\\ExampleMod.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\TerrariaFullsource\\Official merge\\tModLoader\\ExampleMod\\ExampleMod.csproj",
+        "projectName": "ExampleMod",
+        "projectPath": "D:\\TerrariaFullsource\\Official merge\\tModLoader\\ExampleMod\\ExampleMod.csproj",
+        "packagesPath": "C:\\Users\\Alexandre Voghel\\.nuget\\packages\\",
+        "outputPath": "D:\\TerrariaFullsource\\Official merge\\tModLoader\\ExampleMod",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Alexandre Voghel\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net45"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net45": {
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "net45": {}
+      }
+    }
+  }
+}

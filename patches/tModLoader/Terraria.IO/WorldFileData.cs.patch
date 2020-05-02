@@ -1,26 +1,49 @@
 --- src/Terraria\Terraria.IO\WorldFileData.cs
 +++ src/tModLoader\Terraria.IO\WorldFileData.cs
-@@ -1,6 +_,7 @@
+@@ -1,6 +_,8 @@
  using System;
  using System.IO;
  using Terraria.Localization;
 +using Terraria.ModLoader.IO;
++using Terraria.ModLoader.x64bit;
  using Terraria.Utilities;
  
  namespace Terraria.IO
-@@ -163,6 +_,7 @@
+@@ -102,12 +_,17 @@
+ 				this._worldSizeName = Language.GetText("UI.WorldSizeMedium");
+ 				return;
+ 			}
+-			if (x != 8400)
++			if (x == 8400)
++			{
++				this._worldSizeName = Language.GetText("UI.WorldSizeLarge");
++				return;
++			}
++			if (x != 16800)
+ 			{
+ 				this._worldSizeName = Language.GetText("UI.WorldSizeUnknown");
+ 				return;
+ 			}
+-			this._worldSizeName = Language.GetText("UI.WorldSizeLarge");
++			this._worldSizeName = new LocalizedText("UI.WorldSizeXL", "XL");
+ 		}
+ 
+ 		public static WorldFileData FromInvalidWorld(string path, bool cloudSave)
+@@ -163,6 +_,8 @@
  			string worldPathFromName = Main.GetWorldPathFromName(this.Name, true);
  			if (FileUtilities.MoveToCloud(base.Path, worldPathFromName))
  			{
 +				WorldIO.MoveToCloud(base.Path, worldPathFromName);
++				WorldIO64.MoveToCloud(base.Path, worldPathFromName); //tml 64bit change
  				Main.LocalFavoriteData.ClearEntry(this);
  				this._isCloudSave = true;
  				this._path = worldPathFromName;
-@@ -179,6 +_,7 @@
+@@ -179,6 +_,8 @@
  			string worldPathFromName = Main.GetWorldPathFromName(this.Name, false);
  			if (FileUtilities.MoveToLocal(base.Path, worldPathFromName))
  			{
 +				WorldIO.MoveToLocal(base.Path, worldPathFromName);
++				WorldIO64.MoveToLocal(base.Path, worldPathFromName); //tml 64bit change
  				Main.CloudFavoritesData.ClearEntry(this);
  				this._isCloudSave = false;
  				this._path = worldPathFromName;

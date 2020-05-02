@@ -16,6 +16,8 @@ namespace Terraria.ModLoader.UI
 		private int _gotoMenu;
 		private Action _altAction;
 		private string _altText;
+		private Action _mainAction;
+		private string _mainText = Language.GetTextValue("tModLoader.OK");
 
 		public override void OnInitialize() {
 			_area = new UIElement {
@@ -73,6 +75,7 @@ namespace Terraria.ModLoader.UI
 		public override void OnActivate() {
 			_messageBox.SetText(_message);
 			_buttonAlt.SetText(_altText);
+			_button.SetText(_mainText);
 			bool showAlt = !string.IsNullOrEmpty(_altText);
 			_button.Left.Percent = showAlt ? 0 : .25f;
 			_area.AddOrRemoveChild(_buttonAlt, showAlt);
@@ -84,6 +87,17 @@ namespace Terraria.ModLoader.UI
 			_gotoState = state;
 			_altText = altButtonText;
 			_altAction = altButtonAction;
+			_mainText = Language.GetTextValue("tModLoader.OK");
+			Main.menuMode = Interface.infoMessageID;
+		}
+
+		internal void SpecialShow(string message, int gotoMenu, UIState state = null, string mainButtonText = "Ok", string altButtonText = "", Action altButtonAction = null) {
+			_message = message;
+			_gotoMenu = gotoMenu;
+			_gotoState = state;
+			_altText = altButtonText;
+			_altAction = altButtonAction;
+			_mainText = mainButtonText;
 			Main.menuMode = Interface.infoMessageID;
 		}
 

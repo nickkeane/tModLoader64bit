@@ -17,7 +17,7 @@ using Terraria.ModLoader.Core;
 using Terraria.ModLoader.Default;
 using Terraria.ModLoader.Engine;
 using Terraria.ModLoader.UI;
-using Terraria.ModLoader.x64bit.Core;
+using Terraria.ModLoader.x64bit;
 
 namespace Terraria.ModLoader
 {
@@ -29,7 +29,7 @@ namespace Terraria.ModLoader
 		public static readonly Version version = new Version(0, 11, 6, 2);
 		// Stores the most recent version of tModLoader launched. Can be used for migration.
 		public static Version LastLaunchedTModLoaderVersion;
-		// public static bool ShowWhatsNew;
+		public static bool ShowWhatsNew = false;
 		public static bool ShowFirstLaunchWelcomeMessage;
 
 		public static readonly string branchName = "";
@@ -331,6 +331,8 @@ namespace Terraria.ModLoader
 			Main.Configuration.Put(nameof(UI.ModBrowser.UIModBrowser.EarlyAutoUpdate), UI.ModBrowser.UIModBrowser.EarlyAutoUpdate);
 			Main.Configuration.Put("LastLaunchedTModLoaderVersion", version.ToString());
 			Main.Configuration.Put("VanillaMode", Core64.vanillaMode);
+			Main.Configuration.Put("LiteMode", Core64.liteMode);
+			Main.Configuration.Put("Last64BitLaunched", Core64.current64BitInternalVersion);
 		}
 
 		internal static void LoadConfiguration() {
@@ -347,6 +349,8 @@ namespace Terraria.ModLoader
 			Main.Configuration.Get("AvoidImgur", ref UI.ModBrowser.UIModBrowser.AvoidImgur);
 			Main.Configuration.Get(nameof(UI.ModBrowser.UIModBrowser.EarlyAutoUpdate), ref UI.ModBrowser.UIModBrowser.EarlyAutoUpdate);
 			Main.Configuration.Get("VanillaMode", ref Core64.vanillaMode);
+			Main.Configuration.Get("LiteMode", ref Core64.liteMode);
+			Main.Configuration.Get("Last64BitLaunched", ref Core64.last64bitVersionLaunched);
 		}
 
 		internal static void MigrateSettings() {
@@ -362,6 +366,9 @@ namespace Terraria.ModLoader
 			*/
 			if (LastLaunchedTModLoaderVersion == new Version(0, 0))
 				ShowFirstLaunchWelcomeMessage = true;
+
+			if(Core64.last64bitVersionLaunched != Core64.current64BitInternalVersion)
+				ShowWhatsNew = true;
 		}
 
 		/// <summary>

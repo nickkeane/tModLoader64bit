@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
-using Terraria.ModLoader.x64bit.Core;
+using Terraria.ModLoader.x64bit;
 
 namespace Terraria.ModLoader.Default.Developer
 {

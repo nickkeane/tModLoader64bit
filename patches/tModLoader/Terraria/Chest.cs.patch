@@ -5,7 +5,7 @@
  using Terraria.ID;
  using Terraria.ObjectData;
 +using Terraria.ModLoader;
-+using Terraria.ModLoader.x64bit.Core;
++using Terraria.ModLoader.x64bit;
  
  namespace Terraria
  {
@@ -173,8 +173,12 @@
  			if (Main.player[Main.myPlayer].discount)
  			{
  				for (int num7 = 0; num7 < num; num7++)
-@@ -2243,12 +_,12 @@
- 			bool[] array = new bool[1000];
+@@ -2240,15 +_,15 @@
+ 
+ 		public static void UpdateChestFrames()
+ 		{
+-			bool[] array = new bool[1000];
++			bool[] array = new bool[Core64.maxChest];
  			for (int i = 0; i < 255; i++)
  			{
 -				if (Main.player[i].active && Main.player[i].chest >= 0 && Main.player[i].chest < 1000)

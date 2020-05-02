@@ -8,7 +8,8 @@ using Terraria.ModLoader.Config.UI;
 using Terraria.ModLoader.Core;
 using Terraria.ModLoader.UI.DownloadManager;
 using Terraria.ModLoader.UI.ModBrowser;
-using Terraria.ModLoader.x64bit.Core;
+using Terraria.ModLoader.x64bit;
+using Terraria.Utilities;
 
 namespace Terraria.ModLoader.UI
 {
@@ -182,11 +183,21 @@ namespace Terraria.ModLoader.UI
 					ModLoader.ShowFirstLaunchWelcomeMessage = false;
 					infoMessage.Show(Language.GetTextValue("tModLoader.FirstLaunchWelcomeMessage"), Main.menuMode);
 				}
-				//else if (ModLoader.ShowWhatsNew) {
+				else if (ModLoader.ShowWhatsNew) {
 				//	// TODO: possibly pull from github
-				//	ModLoader.ShowWhatsNew = false;
-				//	infoMessage.Show(Language.GetTextValue("tModLoader.WhatsNewMessage"), Main.menuMode);
-				//}
+					ModLoader.ShowWhatsNew = false;
+					/*infoMessage.Show("Welcome to the first tModLoader 64bit public beta!\n" +
+					                 "This beta comes with a lot of quality of life changes that the normal tModLoader does not have.\n" +
+					                 "The most notable changes are:\n" +
+					                 "- Increased maximum number of chests (Up to 2000!)\n" +
+					                 "- Extra large worlds (16800x3600)\n" +
+					                 "- Lite mode! Enable to play with 32bit users!\n" +
+					                 "Do note that some mods may break in extra large world, you can check out the list in our Discord, accessible through the support menu!\n" +
+					                 "Also, the save path for the public beta as been modified to ModLoaderBeta instead of ModLoader.\n" +
+					                 "Thanks!\n" +
+					                 "The tModLoader 64bit team!", Main.menuMode);*/
+					Main.SaveSettings();
+				}
 			}
 
 			
@@ -481,7 +492,13 @@ namespace Terraria.ModLoader.UI
 			// MessageBox.Show fails on Mac, this method will open a text file to show a message.
 			caption = caption ?? "Terraria: Error" + $" ({ModLoader.versionedName})";
 #if !MAC
-			System.Windows.Forms.MessageBox.Show(text, caption);
+			if(PlatformUtilities.IsWindows)
+				System.Windows.Forms.MessageBox.Show(text, caption);
+			else
+			{
+				File.WriteAllText("fake-messagebox.txt", $"{caption}\n\n{text}");
+				Process.Start("fake-messagebox.txt");
+			}
 #else
 			File.WriteAllText("fake-messagebox.txt", $"{caption}\n\n{text}");
 			Process.Start("fake-messagebox.txt");

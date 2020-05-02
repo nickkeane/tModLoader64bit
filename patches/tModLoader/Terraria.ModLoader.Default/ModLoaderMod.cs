@@ -7,7 +7,7 @@ using log4net;
 using Terraria.ModLoader.Core;
 using Terraria.ModLoader.Default.Developer;
 using Terraria.ModLoader.Default.Patreon;
-using Terraria.ModLoader.x64bit.Core;
+using Terraria.ModLoader.x64bit;
 
 namespace Terraria.ModLoader.Default
 {

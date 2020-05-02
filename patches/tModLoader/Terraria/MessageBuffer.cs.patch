@@ -7,7 +7,7 @@
 +using Terraria.ModLoader;
 +using Terraria.ModLoader.Exceptions;
 +using Terraria.ModLoader.IO;
-+using Terraria.ModLoader.x64bit.Core;
++using Terraria.ModLoader.x64bit;
  
  namespace Terraria
  {

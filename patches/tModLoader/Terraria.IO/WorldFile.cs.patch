@@ -1,12 +1,13 @@
 --- src/Terraria\Terraria.IO\WorldFile.cs
 +++ src/tModLoader\Terraria.IO\WorldFile.cs
-@@ -11,6 +_,9 @@
+@@ -11,6 +_,10 @@
  using Terraria.Localization;
  using Terraria.Social;
  using Terraria.Utilities;
 +using Terraria.ModLoader;
++using Terraria.ModLoader.Default;
 +using Terraria.ModLoader.IO;
-+using Terraria.ModLoader.x64bit.Core;
++using Terraria.ModLoader.x64bit;
  
  namespace Terraria.IO
  {
@@ -142,6 +143,15 @@
  			{
  				Chest chest = Main.chest[i];
  				if (chest != null)
+@@ -1360,7 +_,7 @@
+ 								break;
+ 							}
+ 							Tile tile = Main.tile[j, k];
+-							if (!tile.active() || !Main.tileContainer[(int)tile.type])
++							if (!tile.active() || (!Main.tileContainer[(int)tile.type] && tile.type != ModContent.TileType<MysteryTile>()))
+ 							{
+ 								flag = true;
+ 								break;
 @@ -1390,7 +_,7 @@
  					for (int l = 0; l < 40; l++)
  					{

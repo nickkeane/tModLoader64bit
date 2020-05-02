@@ -34,7 +34,7 @@
  using Terraria.Achievements;
  using Terraria.Audio;
  using Terraria.Chat;
-@@ -54,6 +_,12 @@
+@@ -54,6 +_,13 @@
  using Terraria.IO;
  using Terraria.Localization;
  using Terraria.Map;
@@ -44,17 +44,10 @@
 +using Terraria.ModLoader.Engine;
 +using Terraria.ModLoader.IO;
 +using Terraria.ModLoader.UI;
++using Terraria.ModLoader.x64bit;
  using Terraria.Net;
  using Terraria.ObjectData;
  using Terraria.Social;
-@@ -62,6 +_,7 @@
- using Terraria.UI.Gamepad;
- using Terraria.Utilities;
- using Terraria.World.Generation;
-+using Terraria.ModLoader.x64bit.Core;
- 
- #if SERVER
- using Terraria.Server;
 @@ -77,7 +_,7 @@
  	{
  		public delegate void OnPlayerSelected(PlayerFileData player);
@@ -528,7 +521,7 @@
  			try
  			{
  				string path = Main.PlayerList[i].Path.Substring(0, Main.PlayerList[i].Path.Length - 4);
-@@ -3415,18 +_,20 @@
+@@ -3415,18 +_,21 @@
  			{
  				if (!Main.WorldList[i].IsCloudSave)
  				{
@@ -553,13 +546,15 @@
  					SocialAPI.Cloud.Delete(Main.WorldList[i].Path);
  				}
 +				WorldIO.EraseWorld(Main.WorldList[i].Path, Main.WorldList[i].IsCloudSave);
++				WorldIO64.EraseWorld(Main.WorldList[i].Path, Main.WorldList[i].IsCloudSave);
  				Main.LoadWorlds();
  			}
  			catch
-@@ -3709,6 +_,14 @@
+@@ -3708,6 +_,14 @@
+ 							{
  								string text3 = text.Substring(10);
  								Main.worldName = text3;
- 							}
++							}
 +							if (text.Length >= 8 && text.Substring(0, 8).ToLower() == "modpath=")
 +							{
 +								ModOrganizer.modPath = text.Substring(8);
@@ -567,18 +562,8 @@
 +							if (text.Length >= 8 && text.Substring(0, 8).ToLower() == "modpack=")
 +							{
 +								ModOrganizer.commandLineModPack = text.Substring(8);
-+							}
- 							if (text.Length >= 5 && text.Substring(0, 5).ToLower() == "seed=")
- 							{
- 								string autogenSeedName = text.Substring(5);
-@@ -3755,7 +_,7 @@
- 									Main.maxTilesX = 8400;
- 									Main.maxTilesY = 2400;
- 									Main.autoGen = true;
--								}
-+								} 
  							}
- 							if (text.Length > 7 && text.Substring(0, 7).ToLower() == "secure=")
+ 							if (text.Length >= 5 && text.Substring(0, 5).ToLower() == "seed=")
  							{
 @@ -3849,11 +_,11 @@
  		public void DedServ()
@@ -625,6 +610,26 @@
  					Console.WriteLine("");
  					Console.Write(Language.GetTextValue("CLI.ChooseWorld"));
  					string text4 = Console.ReadLine();
+@@ -3949,6 +_,7 @@
+ 							Console.WriteLine("1\t" + Language.GetTextValue("UI.WorldSizeSmall"));
+ 							Console.WriteLine("2\t" + Language.GetTextValue("UI.WorldSizeMedium"));
+ 							Console.WriteLine("3\t" + Language.GetTextValue("UI.WorldSizeLarge"));
++							Console.WriteLine("4\t" + "Extra Large");
+ 							Console.WriteLine("");
+ 							Console.Write(Language.GetTextValue("CLI.ChooseSize"));
+ 							string value = Console.ReadLine();
+@@ -3971,6 +_,11 @@
+ 								{
+ 									Main.maxTilesX = 8400;
+ 									Main.maxTilesY = 2400;
++									flag2 = false;
++								} else if(num3 == 4)
++								{
++									Main.maxTilesX = 16800;
++									Main.maxTilesY = 3600;
+ 									flag2 = false;
+ 								}
+ 							}
 @@ -4155,6 +_,16 @@
  							goto IL_76F;
  						}
@@ -4236,9 +4241,9 @@
  				array[0] = true;
  				array9[0] = string.Format("   {0}  {1,-10}", Language.GetTextValue("UI.LoadingCode"), Program.LoadedPercentage.ToString("P0"));
  				num5 = 1;
-+				if (Terraria.ModLoader.x64bit.Core.Core64.vanillaMode) {
++				if (Core64.vanillaMode) {
 +					Main.SavePath = ReLogic.OS.Platform.Current.GetStoragePath();
-+					Terraria.ModLoader.x64bit.Core.Core64.LoadVanillaPath();
++					Core64.LoadVanillaPath();
 +				}
  			}
  			else if (Main.menuMode == 1212)
@@ -4248,7 +4253,7 @@
  				}
  				array7[0] = 1f;
 -				if (this.selectedMenu >= 1)
-+				if (this.selectedMenu >= 1 && !Terraria.ModLoader.x64bit.Core.Core64.vanillaMode)
++				if (this.selectedMenu >= 1 && !Core64.vanillaMode)
  				{
  					LanguageManager.Instance.SetLanguage(this.selectedMenu);
 -					Main.menuMode = 0;
@@ -4495,14 +4500,14 @@
 -						array9[4] = Lang.menu[5].Value;
 -						num5 = 5;
 -						if (this.selectedMenu == 4 || flag5)
-+						if(Core64.betaMode) { array9[4] = "Extra Large"; }
-+						array9[(Core64.betaMode) ? 5 : 4] = Lang.menu[5].Value;
-+						num5 = (Core64.betaMode) ? 6 : 5;
-+						if (this.selectedMenu == ((Core64.betaMode) ? 5 : 4) || flag5)
++						array9[4] = "Extra Large";
++						array9[5] = Lang.menu[5].Value;
++						num5 = 6;
++						if (this.selectedMenu == 5 || flag5)
  						{
  							flag5 = false;
  							Main.menuMode = 6;
-@@ -45605,16 +_,26 @@
+@@ -45605,16 +_,24 @@
  								Main.maxTilesX = 6400;
  								Main.maxTilesY = 1800;
  							}
@@ -4513,10 +4518,8 @@
  								Main.maxTilesY = 2400;
 +							}
 +							else {
-+								if (Core64.betaMode) {
-+									Main.maxTilesX = 16800;
-+									Main.maxTilesY = 3600;
-+								}
++								Main.maxTilesX = 16800;
++								Main.maxTilesY = 3600;
  							}
  							Main.clrInput();
  							Main.menuMode = -7;
@@ -4582,7 +4585,7 @@
 -				origin3.X *= 0.5f;
 -				origin3.Y *= 0.5f;
 -				Main.spriteBatch.DrawString(Main.fontMouseText, Main.versionNumber, new Vector2(origin3.X + (float)num110 + 10f, (float)Main.screenHeight - origin3.Y + (float)num111 - 2f), color12, 0f, origin3, 1f, SpriteEffects.None, 0f);
-+				Terraria.ModLoader.x64bit.Core.Core64.DrawPatreon(Main.spriteBatch, num109, num110, num111, hasFocus, color12);
++				Core64.DrawPatreon(Main.spriteBatch, num109, num110, num111, hasFocus, color12);
  			}
  			Vector2 bonus = Main.DrawThickCursor(false);
  			Main.DrawCursor(bonus, false);

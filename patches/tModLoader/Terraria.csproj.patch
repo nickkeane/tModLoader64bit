@@ -129,7 +129,7 @@
 +    </Reference>
      <Reference Include="Newtonsoft.Json" />
 +    <Reference Include="Steamworks.NET">
-+      <HintPath>..\..\references\Steamworks.NET.Windows.dll</HintPath>
++      <HintPath>..\..\references\Steamworks.NET.Linux.dll</HintPath>
 +    </Reference>
      <Reference Include="System" />
 -    <Reference Include="Steamworks.NET">
@@ -190,7 +190,7 @@
 -    <Compile Include="Terraria.GameContent.UI.Elements\UIProgressBar.cs" />
 +    <Compile Include="Terraria.ModLoader.Default.Patreon\POCKETS.cs" />
 +    <Compile Include="Terraria.ModLoader.UI\UIProgressBar.cs" />
-+    <Compile Include="Terraria.ModLoader.x64bit.Core\Core64.cs" />
++    <Compile Include="Terraria.ModLoader.x64bit\Core64.cs" />
 +    <Compile Include="Terraria.ModLoader.Config.UI\DefinitionElement.cs" />
 +    <Compile Include="Terraria.ModLoader.Config.UI\NPCDefinitionElement.cs" />
 +    <Compile Include="Terraria.ModLoader.Config.UI\PrefixDefinitionElement.cs" />
@@ -219,7 +219,7 @@
      <Compile Include="Terraria.ID\NPCID.cs" />
      <Compile Include="Terraria.ID\PlayerTextureID.cs" />
      <Compile Include="Terraria.ID\PlayerVariantID.cs" />
-@@ -339,6 +_,232 @@
+@@ -339,6 +_,233 @@
      <Compile Include="Terraria.Map\MapHelper.cs" />
      <Compile Include="Terraria.Map\MapTile.cs" />
      <Compile Include="Terraria.Map\WorldMap.cs" />
@@ -354,6 +354,7 @@
 +    <Compile Include="Terraria.ModLoader.UI\UIProgress.cs" />
 +    <Compile Include="Terraria.ModLoader.UI\UIUpdateMessage.cs" />
 +    <Compile Include="Terraria.ModLoader.Core\AssemblyManager.cs" />
++    <Compile Include="Terraria.ModLoader.x64bit\WorldIO64.cs" />
 +    <Compile Include="Terraria.ModLoader\AutoloadEquip.cs" />
 +    <Compile Include="Terraria.ModLoader\AutoloadHead.cs" />
 +    <Compile Include="Terraria.ModLoader\BackgroundStyleLoaders.cs" />
@@ -476,7 +477,7 @@
      <Compile Include="Terraria\Main.cs" />
      <Compile Include="Terraria\MessageBuffer.cs" />
      <Compile Include="Terraria\Minecart.cs" />
-@@ -501,7 +_,7 @@
+@@ -501,26 +_,25 @@
      <Compile Include="Terraria\TimeLogger.cs" />
      <Compile Include="Terraria\Utils.cs" />
      <Compile Include="Terraria\WaterfallManager.cs" />
@@ -485,13 +486,14 @@
      <Compile Include="Terraria\Wiring.cs" />
      <Compile Include="Terraria\WorldGen.cs" />
      <Compile Include="Terraria\WorldSections.cs" />
-@@ -509,15 +_,14 @@
+     <Compile Include="Terraria\ZoomContext.cs" />
    </ItemGroup>
    <ItemGroup>
-     <EmbeddedResource Include="Microsoft.Xna.Framework.RuntimeProfile" />
+-    <EmbeddedResource Include="Microsoft.Xna.Framework.RuntimeProfile" />
 -    <EmbeddedResource Include="Terraria.Libraries\DotNetZip\Ionic.Zip.CF.dll" />
 -    <EmbeddedResource Include="Terraria.Libraries\JSON.NET\Newtonsoft.Json.dll" />
 -    <EmbeddedResource Include="..\..\references\ReLogicWindows.dll" Condition="$(DefineConstants.Contains('WINDOWS'))">
++    <EmbeddedResource Include="Microsoft.Xna.Framework.RuntimeProfile" Condition="$(DefineConstants.Contains('XNA'))" />
 +    <EmbeddedResource Include="..\..\references\Ionic.Zip.Reduced.dll" />
 +    <EmbeddedResource Include="Terraria.Libraries\JSON.NET\Newtonsoft.Json.dll">
 +      <LogicalName>Newtonsoft.Json.dll</LogicalName>
@@ -500,14 +502,18 @@
        <LogicalName>ReLogic.dll</LogicalName>
      </EmbeddedResource>
 -    <EmbeddedResource Include="..\..\references\ReLogicMac.dll" Condition="$(DefineConstants.Contains('MAC'))">
--      <LogicalName>ReLogic.dll</LogicalName>
--    </EmbeddedResource>
--    <EmbeddedResource Include="..\..\references\ReLogicLinux.dll" Condition="$(DefineConstants.Contains('LINUX'))">
 +    <EmbeddedResource Include="..\..\references\ReLogicFNA.dll" Condition="$(DefineConstants.Contains('FNA'))">
        <LogicalName>ReLogic.dll</LogicalName>
      </EmbeddedResource>
-     <EmbeddedResource Include="..\..\references\Steamworks.NET.Windows.dll" Condition="$(DefineConstants.Contains('WINDOWS'))">
-@@ -529,6 +_,20 @@
+-    <EmbeddedResource Include="..\..\references\ReLogicLinux.dll" Condition="$(DefineConstants.Contains('LINUX'))">
+-      <LogicalName>ReLogic.dll</LogicalName>
+-    </EmbeddedResource>
+-    <EmbeddedResource Include="..\..\references\Steamworks.NET.Windows.dll" Condition="$(DefineConstants.Contains('WINDOWS'))">
++    <EmbeddedResource Include="..\..\references\Steamworks.NET.64bit.dll" Condition="$(DefineConstants.Contains('FNA'))">
+       <LogicalName>Steamworks.NET.dll</LogicalName>
+     </EmbeddedResource>
+     <EmbeddedResource Include="..\..\references\Steamworks.NET.OSX.dll" Condition="$(DefineConstants.Contains('MAC'))">
+@@ -529,6 +_,31 @@
      <EmbeddedResource Include="..\..\references\Steamworks.NET.Linux.dll" Condition="$(DefineConstants.Contains('LINUX'))">
        <LogicalName>Steamworks.NET.dll</LogicalName>
      </EmbeddedResource>
@@ -517,6 +523,17 @@
 +    <EmbeddedResource Include="..\..\references\TerrariaHooks.FNA.dll" Condition="$(DefineConstants.Contains('FNA'))">
 +      <LogicalName>TerrariaHooks.dll</LogicalName>
 +    </EmbeddedResource>
++	<EmbeddedResource Include="..\..\references\System.ValueTuple.Windows.dll" Condition="$(DefineConstants.Contains('XNA'))">
++      <LogicalName>System.ValueTuple.dll</LogicalName>
++    </EmbeddedResource>
++	<EmbeddedResource Include="..\..\references\System.ValueTuple.Mono.dll" Condition="$(DefineConstants.Contains('FNA'))">
++      <LogicalName>System.ValueTuple.dll</LogicalName>
++    </EmbeddedResource>
++	<EmbeddedResource Include="..\..\references\Microsoft.Xna.Framework.dll" Condition="$(DefineConstants.Contains('XNA'))" />
++	<EmbeddedResource Include="..\..\references\Microsoft.Xna.Framework.Game.dll" Condition="$(DefineConstants.Contains('XNA'))" />
++	<EmbeddedResource Include="..\..\references\Microsoft.Xna.Framework.Graphics.dll" Condition="$(DefineConstants.Contains('XNA'))" />
++	<EmbeddedResource Include="..\..\references\Microsoft.Xna.Framework.Xact.dll" Condition="$(DefineConstants.Contains('XNA'))" />
++    <EmbeddedResource Include="..\..\references\FNA.dll" Condition="$(DefineConstants.Contains('FNA'))" />
 +    <EmbeddedResource Include="..\..\references\MP3Sharp.dll" />
 +    <EmbeddedResource Include="..\..\references\NVorbis.dll" />
 +    <EmbeddedResource Include="..\..\references\log4net.dll" />

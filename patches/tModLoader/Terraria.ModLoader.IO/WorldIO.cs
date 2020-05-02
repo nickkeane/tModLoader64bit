@@ -2,10 +2,11 @@ using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Threading.Tasks;
 using Terraria.ID;
 using Terraria.ModLoader.Default;
 using Terraria.ModLoader.Exceptions;
-using Terraria.ModLoader.x64bit.Core;
+using Terraria.ModLoader.x64bit;
 using Terraria.Social;
 using Terraria.Utilities;
 
@@ -95,13 +96,35 @@ namespace Terraria.ModLoader.IO
 			return list;
 		}
 
+		internal static TagCompound SaveChestType(Chest chest) {
+			TagCompound tag = new TagCompound();
+			var isModdedChest = Main.tile[chest.x, chest.y].type != 21 && Main.tile[chest.x, chest.y].type != 467 && Main.tile[chest.x, chest.y].type != 468;
+			tag.Add("ModdedChest", isModdedChest);
+			if (isModdedChest) {
+				tag.Add("chestID", TileLoader.GetTile(Main.tile[chest.x, chest.y].type).Name);
+			}
+			else {
+				tag.Add("chestID", Main.tile[chest.x, chest.y].type);
+				if (Main.tile[chest.x, chest.y].type == 21) {
+					tag.Add("chestType", Main.tile[chest.x, chest.y].frameX / 36);
+				}
+			}
+			return tag;
+		}
+
 		internal static void LoadChests(IList<TagCompound> list) {
 			foreach (var tag in list) {
 				int x = tag.GetInt("x");
 				int y = tag.GetInt("y");
+				var chestData = tag.GetCompound("type");
 				int chest = Chest.FindChest(x, y);
 				if (chest < 0)
-					chest = Chest.CreateChest(x, y);
+					try {
+						chest = Chest.CreateChest(x, y, (tag.GetBool("ModdedChest") ? tag.GetAsInt("chestID") : (tag.GetAsInt("chestID") == 21) ? tag.GetAsInt("chestType") : tag.GetAsInt("chestID")));
+					}
+					catch (Exception e) {
+						chest = Chest.CreateChest(x, y, 1);
+					}
 				if (chest >= 0)
 					PlayerIO.LoadInventory(Main.chest[chest].item, tag.GetList<TagCompound>("items"));
 			}

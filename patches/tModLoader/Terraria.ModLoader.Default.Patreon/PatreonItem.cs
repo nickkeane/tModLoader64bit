@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 using Terraria.Localization;
-using Terraria.ModLoader.x64bit.Core;
+using Terraria.ModLoader.x64bit;
 
 namespace Terraria.ModLoader.Default.Patreon
 {

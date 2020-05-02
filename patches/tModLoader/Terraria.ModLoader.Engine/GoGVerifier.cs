@@ -46,8 +46,8 @@ namespace Terraria.ModLoader.Engine
 					vanillaGoGhash = ToByteArray("e8dfb127721edc4ceb32381f41ece7b8");
 					break;
 				case PlatformID.Unix:
-					steamAPIpath = "lib/libsteam_api.so";
-					steamAPIhash = ToByteArray("7B74FD4C207D22DB91B4B649A44467F6");
+					steamAPIpath = "lib64/libsteam_api.so";
+					steamAPIhash = ToByteArray("88672F3DB4C1ED4C74A2BADDFA5DEDAE");
 					vanillaGoGhash = ToByteArray("942ab061e854c74db3a6b1efe2dc24d0");
 					break;
 				default:
@@ -62,7 +62,7 @@ namespace Terraria.ModLoader.Engine
 			Console.WriteLine(File.Exists(steamAPIpath));
 			Console.WriteLine(File.Exists("./steam_api.dll"));
 			
-			if (File.Exists(steamAPIpath) && File.Exists("./steam_api.dll")) {
+			if (File.Exists(steamAPIpath) || (File.Exists("./steam_api.dll") && PlatformUtilities.IsWindows)) {
 				VerifySteamAPI(steamAPIpath, steamAPIhash);
 				return false;
 			}
@@ -76,6 +76,7 @@ namespace Terraria.ModLoader.Engine
 				Logging.tML.Info("Vanilla Terraria.exe not found.");
 				string message = $"{vanillaPath} not found.\n\nGoG installs must have the unmodified Terraria exe to function.\n\nPlease restore your Terraria install, then install tModLoader using the provided tModLoaderInstaller.jar or by following the README.txt instructions.";
 				Logging.tML.Fatal(message);
+
 				UI.Interface.MessageBoxShow(message);
 				Environment.Exit(1);
 				return false;

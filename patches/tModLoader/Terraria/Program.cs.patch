@@ -1,6 +1,6 @@
 --- src/Terraria\Terraria\Program.cs
 +++ src/tModLoader\Terraria\Program.cs
-@@ -12,12 +_,14 @@
+@@ -12,12 +_,13 @@
  using System.Runtime.ExceptionServices;
  using System.Text;
  using System.Threading;
@@ -12,7 +12,6 @@
  using Terraria.Localization;
 +using Terraria.ModLoader;
 +using Terraria.ModLoader.Core;
-+using Terraria.ModLoader.x64bit.Core;
  using Terraria.Social;
  using Terraria.Utilities;
  
@@ -66,7 +65,7 @@
  					}
  				}
  				Program.ThingsLoaded++;
-@@ -205,20 +_,71 @@
+@@ -205,20 +_,93 @@
  #endif
  			try
  			{
@@ -90,13 +89,31 @@
  		public static void LaunchGame(string[] args, bool monoArgs = false)
  		{
 +#if FNA && CLIENT
++			if(!Environment.Is64BitOperatingSystem)
++			{
++				MessageBox.Show("Your current OS has been detected as a 32bit OS\n" +
++				                    "Sadly, since tmodloader 64bit doesn't support 32bit OS you'll have to either upgrade your OS to 64bit or get a 64bit computer.\n" +
++				                    "However, this doesn't mean that 32bit won't be supported in a future.", "Terraria.exe",MessageBoxButtons.OK);
++				Environment.Exit(1);
++			}
++
 +			//This check here if the proper VCRedist is installed on windows, should take care of the Faudio problem for some user (other need to update their driver)
 +			if (PlatformUtilities.IsWindows) {
 +				if (!PlatformUtilities.RegisteryKeyInstalled(@"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64")) {
-+					MessageBox.Show("You are missing the vc redist required for the Faudio dll, please download it on the tmodloader 64bit discord.\n" +
-+					                "link: https://discord.gg/DY8cx5T in the #release channel", "Terraria.exe", MessageBoxButtons.OK);
-+					Environment.Exit(1);
-+					throw new Exception("VCredist is not installed");
++					MessageBox.Show("You are missing the VC Redist required for the Faudio.dll.\n" +
++					                "Now executing the VC redist installer included with this package.\n" +
++					                "If you have more problem, you can join our discord.\n" +
++					                "link: https://discord.gg/DY8cx5T \n", "Terraria.exe", MessageBoxButtons.OK);
++					ProcessStartInfo installerStartInfo = new ProcessStartInfo("VC_redist.x64.exe", "/quiet /norestart");
++					Process process = Process.Start(installerStartInfo);
++					Console.Write("Installing VC redist, please wait...");
++
++					while(!process.HasExited)
++					{
++
++					}
++
++					Console.Write("Installation done!");
 +				}
 +			}
 +#endif
@@ -114,23 +131,27 @@
 +				LaunchParameters.ContainsKey("-savedirectory") ? Path.Combine(LaunchParameters["-savedirectory"], "ModLoader") :
 +				Platform.Current.GetStoragePath($"Terraria{Path.DirectorySeparatorChar}ModLoader");
 +
-+			if (Core64.betaMode) {
-+				SavePath =
-+					LaunchParameters.ContainsKey("-tmlsavedirectory") ? LaunchParameters["-tmlsavedirectory"] :
-+					LaunchParameters.ContainsKey("-savedirectory") ? Path.Combine(LaunchParameters["-savedirectory"], "ModLoaderBeta") :
-+					Platform.Current.GetStoragePath($"Terraria{Path.DirectorySeparatorChar}ModLoaderBeta");
-+			}
 +
-+			
 +
 +			try {
 +				Logging.Init();
-+
++				
 +			} catch (Exception e) {
 +				DisplayException(e);
 +				return;
 +			}
-+
++			if(PlatformUtilities.IsLinux)
++			{
++				Logging.tML.Info($"Setting LD_LIBRARY_PATH to {Path.Combine(Environment.CurrentDirectory, "lib64")}");
++				Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", Path.Combine(Environment.CurrentDirectory, "lib64"));
++				
++			}
++			if(PlatformUtilities.IsOSX)
++			{
++				Logging.tML.Info($"Setting DYLD_LIBRARY_PATH to {Path.Combine(Environment.CurrentDirectory, "osx")}");
++				Environment.SetEnvironmentVariable("DYLD_LIBRARY_PATH", Path.Combine(Environment.CurrentDirectory, "osx"));
++				
++			}
 +			LaunchGame_();
 +		}
 +

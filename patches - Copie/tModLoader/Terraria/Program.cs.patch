@@ -1,0 +1,189 @@
+--- src/Terraria\Terraria\Program.cs
++++ src/tModLoader\Terraria\Program.cs
+@@ -12,12 +_,13 @@
+ using System.Runtime.ExceptionServices;
+ using System.Text;
+ using System.Threading;
+-
+ #if CLIENT
+ using System.Windows.Forms;
+ #endif
+ using Terraria.Initializers;
+ using Terraria.Localization;
++using Terraria.ModLoader;
++using Terraria.ModLoader.Core;
+ using Terraria.Social;
+ using Terraria.Utilities;
+ 
+@@ -32,6 +_,7 @@
+ 		public const bool IsServer = true;
+ 		#endif
+ 		public static Dictionary<string, string> LaunchParameters = new Dictionary<string, string>();
++		public static string SavePath { get; private set; } // moved from Main to avoid triggering the Main static constructor before logging initializes
+ 		private static int ThingsToLoad = 0;
+ 		private static int ThingsLoaded = 0;
+ 		public static bool LoadedEverything = false;
+@@ -63,6 +_,7 @@
+ 		{
+ 			Program.ForceLoadAssembly(Assembly.GetExecutingAssembly(), true);
+ 			Program.LoadedEverything = true;
++			Logging.Terraria.Info("JIT loading finished");
+ 		}
+ 
+ 		private static void ForceJITOnAssembly(Assembly assembly)
+@@ -72,22 +_,23 @@
+ 			for (int i = 0; i < array.Length; i++)
+ 			{
+ 				Type type = array[i];
+-#if WINDOWS
+-				MethodInfo[] methods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
+-#else
+-				MethodInfo[] methods = type.GetMethods();
+-#endif
++
++				MethodInfo[] methods;
++				if(PlatformUtilities.IsWindows)
++					methods = type.GetMethods(BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Static | BindingFlags.Public | BindingFlags.NonPublic);
++				else
++					methods = type.GetMethods();
++
+ 				MethodInfo[] array2 = methods;
+ 				for (int j = 0; j < array2.Length; j++)
+ 				{
+ 					MethodInfo methodInfo = array2[j];
+ 					if (!methodInfo.IsAbstract && !methodInfo.ContainsGenericParameters && methodInfo.GetMethodBody() != null)
+ 					{
+-#if WINDOWS
+-						RuntimeHelpers.PrepareMethod(methodInfo.MethodHandle);
+-#else
+-						Program.JitForcedMethodCache = methodInfo.MethodHandle.GetFunctionPointer();
+-#endif
++						if(PlatformUtilities.IsWindows)
++							RuntimeHelpers.PrepareMethod(methodInfo.MethodHandle);
++						else
++							Program.JitForcedMethodCache = methodInfo.MethodHandle.GetFunctionPointer();
+ 					}
+ 				}
+ 				Program.ThingsLoaded++;
+@@ -205,20 +_,62 @@
+ #endif
+ 			try
+ 			{
+-				Console.OutputEncoding = Encoding.Unicode;
+-				Console.InputEncoding = Encoding.Unicode;
++				Console.OutputEncoding = Encoding.UTF8;
++
++				if (Platform.IsWindows)
++					Console.InputEncoding = Encoding.Unicode;
++				else
++					Console.InputEncoding = Encoding.UTF8;
+ 			}
+ 			catch
+ 			{
+ 			}
+ 		}
+ 
++		// some versions of the .NET runtime will run the Main static initilizer as soon as LaunchGame is invoked
++		// causing Main.SavePath to be initialized before LaunchParameters is parsed.
++		// moving arg parsing to a separate function avoids this
+ 		public static void LaunchGame(string[] args, bool monoArgs = false)
+ 		{
++#if FNA && CLIENT
++			//This check here if the proper VCRedist is installed on windows, should take care of the Faudio problem for some user (other need to update their driver)
++			if (PlatformUtilities.IsWindows) {
++				if (!PlatformUtilities.RegisteryKeyInstalled(@"SOFTWARE\Microsoft\VisualStudio\14.0\VC\Runtimes\x64")) {
++					MessageBox.Show("You are missing the vc redist required for the Faudio dll, please download it on the tmodloader 64bit discord.\n" +
++					                "link: https://discord.gg/DY8cx5T in the #release channel", "Terraria.exe", MessageBoxButtons.OK);
++					Environment.Exit(1);
++					throw new Exception("VCredist is not installed");
++				}
++			}
++#endif
++
+ 			if (monoArgs)
+ 			{
+ 				args = Utils.ConvertMonoArgsToDotNet(args);
+ 			}
++
++			LaunchParameters = Utils.ParseArguements(args);
++			
++			typeof(ReLogic.OS.Platform).GetField("Current", BindingFlags.Static | BindingFlags.Public).SetValue(null, new UniversalPlatform(PlatformType.Linux));
++			SavePath =
++				LaunchParameters.ContainsKey("-tmlsavedirectory") ? LaunchParameters["-tmlsavedirectory"] :
++				LaunchParameters.ContainsKey("-savedirectory") ? Path.Combine(LaunchParameters["-savedirectory"], "ModLoader") :
++				Platform.Current.GetStoragePath($"Terraria{Path.DirectorySeparatorChar}ModLoader");
++
++			try {
++				Logging.Init();
++				
++			} catch (Exception e) {
++				DisplayException(e);
++				return;
++			}
++			
++			LaunchGame_();
++		}
++
++		public static void LaunchGame_()
++		{
++			
+ 			if (Platform.IsOSX)
+ 			{
+ 				Main.OnEngineLoad += delegate
+@@ -226,14 +_,15 @@
+ 					Main.instance.IsMouseVisible = false;
+ 				};
+ 			}
+-			Program.LaunchParameters = Utils.ParseArguements(args);
+ 			ThreadPool.SetMinThreads(8, 8);
+ 			LanguageManager.Instance.SetLanguage(GameCulture.English);
+-			Program.SetupLogging();
+-			using (Main main = new Main())
+-			{
+-				try
+-				{
++			//Program.SetupLogging();
++			try {
++				//typeof(ReLogic.OS.Platform).GetField("Current", BindingFlags.DeclaredOnly | BindingFlags.Static | BindingFlags.Public).SetValue(new UniversalPlatform(PlatformType.Linux), null);
++				ModLoader.ModLoader.EngineInit();
++				using (Main main = new Main())
++				{
++
+ 					Program.InitializeConsoleOutput();
+ 					Lang.InitializeLegacyLocalization();
+ 					SocialAPI.Initialize(null);
+@@ -245,10 +_,10 @@
+ 					main.DedServ();
+ #endif
+ 				}
+-				catch (Exception e)
+-				{
+-					Program.DisplayException(e);
+-				}
++			}
++			catch (Exception e) {
++				Logging.Terraria.Fatal("Main engine crash", e);
++				Program.DisplayException(e);
+ 			}
+ 		}
+ 
+@@ -263,9 +_,16 @@
+ 					streamWriter.WriteLine("");
+ 				}
+ #if CLIENT
+-				MessageBox.Show(e.ToString(), "Terraria: Error");
++				MessageBox.Show(e.ToString(), "Terraria: Error" + $" ({ModLoader.ModLoader.versionedName})");
++				if (e.Message.Contains("CSteamworks"))
++					Process.Start(@"https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Usage-FAQ#systemdllnotfoundexception-unable-to-load-dllcsteamworks");
++				if (e.StackTrace.Contains("LaunchLocalServer"))
++				{
++					MessageBox.Show("Looks like you didn't do a complete install. You are missing tModLoaderServer.exe. Check your install directory and read the install directions.", "Terraria: Error");
++					Process.Start(@"https://github.com/tModLoader/tModLoader/wiki/Basic-tModLoader-Usage-FAQ#host-and-play-the-system-cannot-find-the-file-specified");
++				}
+ #else
+-				Console.WriteLine(Language.GetTextValue("Error.ServerCrash"), DateTime.Now, e);
++				Console.WriteLine(Language.GetTextValue("tModLoader.ServerCrash"), DateTime.Now, e);
+ #endif
+ 			}
+ 			catch
+
