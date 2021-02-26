@@ -33,7 +33,7 @@ namespace Terraria.ModLoader.x64bit
 		internal const int vanillaChestLimit = 1000;
 		internal static readonly int maxChest = 2000;
 
-		internal static readonly string current64BitInternalVersion = "0.11.8";
+		internal static readonly string current64BitInternalVersion = "0.11.8.1";
 		internal static string last64bitVersionLaunched = "";
 
 		internal static void SetupVariable() {
